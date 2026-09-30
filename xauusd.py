@@ -1,9 +1,10 @@
 # ============================================================
-# Wfx PRO — SMC + FIBONACCI — v6.3.1
+# Wfx PRO — SMC + FIBONACCI — v6.3.2
 # ------------------------------------------------------------
 # EA untuk MetaTrader 5 (XAUUSD).
 # Strategi: Smart Money Concepts (SMC) + Fibonacci.
 # Model: CONTINUATION, REVERSAL, SWEEP.
+# PERCENT 33/33 partial + rebuild RR-based
 # ============================================================
 
 
@@ -45,20 +46,20 @@ ERROR_LOG = BASE_DIR / "error.log"            # Path log error
 
 # ============================================================
 # SECTION: DEFAULT_CONFIG
-# Nilai default semua setting. Kalau config.json tidak ada
-# atau kurang key, di-merge dari sini.
+# Nilai default. Kalau config.json tidak ada / kurang key,
+# di-merge dari sini.
 # ============================================================
 DEFAULT_CONFIG = {
     # ----- SYMBOL & TIMEFRAMES -----
     "SYMBOL": "XAUUSD.vxc",       # Symbol trading (sesuaikan broker)
     "TIMEFRAME_ENTRY": "M5",      # TF entry signal (candle 5 menit)
-    "TIMEFRAME_SMC": "M15",       # TF deteksi zona SMC (demand/supply)
-    "TIMEFRAME_HTF": "H1",        # TF trend besar (higher timeframe)
+    "TIMEFRAME_SMC": "M15",       # TF deteksi zona SMC
+    "TIMEFRAME_HTF": "H1",        # TF trend besar
 
     # ----- RISK MANAGEMENT -----
     "RISK_PER_TRADE_PCT": 1.0,    # Risiko per trade (% balance) — belum dipakai
     "MAX_DAILY_LOSS_PCT": 20.0,   # Stop entry kalau daily loss ≥ 20%
-    "MAX_OPEN_POSITIONS": 6,      # Max posisi global (semua model)
+    "MAX_OPEN_POSITIONS": 6,      # Max posisi global
     "MAX_PER_MODEL": 2,           # Fallback max per model
 
     # ----- MODEL TOGGLES -----
@@ -76,67 +77,67 @@ DEFAULT_CONFIG = {
     "TP_RR_TP1": 1.0,             # TP1 = entry ± risk × 1.0
     "TP_RR_TP2": 2.0,             # TP2 = entry ± risk × 2.0
     "TP_RR_TP3": 3.0,             # TP3 = entry ± risk × 3.0
-    "MIN_RR_TP3": 1.2,            # RR minimal (tolak di bawah)
+    "MIN_RR_TP3": 1.2,            # RR minimal
     "MAX_RR_TP3": 8.0,            # RR soft cap
-    "HARD_MAX_RR_TP3": 12.0,      # RR hard cap (tolak di atas)
+    "HARD_MAX_RR_TP3": 12.0,      # RR hard cap
 
     # ----- TRADE MANAGEMENT -----
     "BE_TRIGGER_ATR": 1.0,        # BE aktif saat profit ≥ 1× ATR
     "TRAIL_TRIGGER_ATR": 2.0,     # Trailing aktif saat profit ≥ 2× ATR
     "TRAIL_SECURE_PCT": 50,       # SL = entry + profit × 50%
 
-    # ----- PARTIAL CLOSE -----
-    "PARTIAL_MODE": "LOT",        # Mode LOT / PERCENT
-    "PARTIAL_PCT_1": 50,          # (PERCENT) TP1 tutup 50%
-    "PARTIAL_PCT_2": 50,          # (PERCENT) TP2 tutup 50%
-    "PARTIAL_LOT_1": 0.01,        # (LOT) TP1 tutup 0.01 lot
-    "PARTIAL_LOT_2": 0.01,        # (LOT) TP2 tutup 0.01 lot
+    # ----- PARTIAL CLOSE (v6.3.2: PERCENT 33/33) -----
+    "PARTIAL_MODE": "PERCENT",    # ← UBAH: dari "LOT" ke "PERCENT"
+    "PARTIAL_PCT_1": 33,          # ← UBAH: TP1 tutup 33% lot
+    "PARTIAL_PCT_2": 33,          # ← UBAH: TP2 tutup 33% lot
+    "PARTIAL_LOT_1": 0.01,        # (mode LOT, tidak dipakai)
+    "PARTIAL_LOT_2": 0.01,        # (mode LOT, tidak dipakai)
     "PARTIAL_MIN_LOT": 0.03,      # Lot minimal untuk aktifkan partial
 
     # ----- ENTRY FILTERS -----
-    "MIN_CONFLUENCE": 70,         # Skor minimum untuk entry (0-100)
-    "USE_FIB_GATE": False,        # Fib sebagai gate (True) atau flag (False)
-    "USE_SESSION_FILTER": True,   # Filter session aktif
-    "SESSION_TIMEZONE": "Asia/Jakarta",  # Timezone untuk session
-    "USE_ATR_FILTER": True,       # ATR harus ≥ MIN_ATR_VALUE
-    "MIN_ATR_VALUE": 0.8,         # Minimal ATR untuk boleh entry
-    "USE_CLOSED_CANDLE_LOCK": True,   # Lock signal di candle close
+    "MIN_CONFLUENCE": 70,         # Skor minimum entry
+    "USE_FIB_GATE": False,        # Fib sebagai gate/flag
+    "USE_SESSION_FILTER": True,   # Filter session
+    "SESSION_TIMEZONE": "Asia/Jakarta",
+    "USE_ATR_FILTER": True,       # ATR ≥ MIN_ATR_VALUE
+    "MIN_ATR_VALUE": 0.8,         # Minimal ATR
+    "USE_CLOSED_CANDLE_LOCK": True,
 
     # ----- SMC / ZONE -----
     "SMC_ZONE_SENSITIVITY": 0.10, # Body candle > ATR × 0.10 = zona valid
     "SMC_MAX_ZONES": 20,          # Max 20 zona per arah
-    "SWEEP_LOOKBACK": 20,         # Lookback 20 candle untuk sweep
-    "SWING_STRICTNESS": 1,        # Swing strictness (1=longgar, 3=ketat)
-    "ZONE_TOLERANCE_ATR": 0.20,   # Toleransi zona = 0.20 × ATR
+    "SWEEP_LOOKBACK": 20,         # Lookback 20 candle
+    "SWING_STRICTNESS": 1,        # Swing strictness (1=longgar)
+    "ZONE_TOLERANCE_ATR": 0.20,   # Toleransi zona
     "MIN_SWING_SIZE": 1.5,        # Swing minimal 1.5 poin
-    "SWING_FIB_LOOKBACK": 80,     # Lookback 80 candle untuk cari swing fib
+    "SWING_FIB_LOOKBACK": 80,     # Lookback swing fib
 
     # ----- FILTER TOGGLES -----
-    "USE_CHOCH": True,            # Aktifkan deteksi CHoCH
-    "USE_REJECTION_WICK": True,   # Aktifkan deteksi wick rejection
-    "USE_SMART_SWEEP": True,      # Aktifkan deteksi liquidity sweep
-    "USE_ORDER_BLOCK": True,      # Aktifkan deteksi order block
-    "USE_FVG": True,              # Aktifkan deteksi Fair Value Gap
-    "USE_CONFLUENCE_CHECK": True, # Aktifkan cek HTF confluence
+    "USE_CHOCH": True,
+    "USE_REJECTION_WICK": True,
+    "USE_SMART_SWEEP": True,
+    "USE_ORDER_BLOCK": True,
+    "USE_FVG": True,
+    "USE_CONFLUENCE_CHECK": True,
 
     # ----- FIBONACCI ENTRY ZONES -----
-    "FIB_ENTRY_ZONE_CONTINUATION": [0.236, 0.886],  # Zona fib CONTINUATION
-    "FIB_ENTRY_ZONE_REVERSAL": [0.5, 0.886],        # Zona fib REVERSAL
-    "FIB_ENTRY_ZONE_SWEEP": [0.382, 0.886],         # Zona fib SWEEP
+    "FIB_ENTRY_ZONE_CONTINUATION": [0.236, 0.886],
+    "FIB_ENTRY_ZONE_REVERSAL": [0.5, 0.886],
+    "FIB_ENTRY_ZONE_SWEEP": [0.382, 0.886],
 
     # ----- ANTI RE-ENTRY -----
-    "MIN_REENTRY_ATR": 1.5,       # Jarak minimum re-entry = 1.5 × ATR
-    "LOSS_REENTRY_ATR": 1.5,      # Trigger averaging saat loss ≥ 1.5 × ATR
-    "RETRACE_MIN_PERCENT": 20.0,  # Setelah TP3, tunggu retrace 20%
+    "MIN_REENTRY_ATR": 1.5,       # Jarak minimum re-entry = 1.5× ATR
+    "LOSS_REENTRY_ATR": 1.5,      # Trigger averaging
+    "RETRACE_MIN_PERCENT": 20.0,  # Retrace setelah TP3
 
     # ----- LOT SIZING -----
     "LOT_SIZE": 0.01,             # Fallback lot
-    "LOT_TIER_1": 0.01,           # Confluence 70-79% → lot 0.01
-    "LOT_TIER_2": 0.03,           # Confluence 80-89% → lot 0.03
-    "LOT_TIER_3": 0.06,           # Confluence 90-100% → lot 0.06
-    "MIN_LOT_SIZE": 0.01,         # Lot minimum
-    "MAX_LOT_SIZE": 0.06,         # Lot maksimum
-    "HARD_LOT_CAP": 0.06,         # Cap keras (extra safety)
+    "LOT_TIER_1": 0.01,           # Confluence 70-79% → 0.01
+    "LOT_TIER_2": 0.03,           # Confluence 80-89% → 0.03
+    "LOT_TIER_3": 0.06,           # Confluence 90-100% → 0.06
+    "MIN_LOT_SIZE": 0.01,
+    "MAX_LOT_SIZE": 0.06,
+    "HARD_LOT_CAP": 0.06,
 
     # ----- SESSION FILTER -----
     "SESSION_FILTER": {
@@ -148,33 +149,32 @@ DEFAULT_CONFIG = {
     },
 
     # ----- MISC -----
-    "MAGIC": 777777,              # Magic number EA (identifikasi order)
-    "USE_AUTO_TRADE": True,       # Auto execute order
-    "STATS_LOOKBACK_DAYS": 30,    # Stats 30 hari terakhir
-    "SHOW_DIAGNOSTIC_PANEL": True,# Tampilkan panel DIAGNOSTIC
+    "MAGIC": 777777,
+    "USE_AUTO_TRADE": True,
+    "STATS_LOOKBACK_DAYS": 30,
+    "SHOW_DIAGNOSTIC_PANEL": True,
 
     # ----- MANUAL RECOVERY -----
-    "USE_MANUAL_RECOVERY": True,  # Aktifkan recovery posisi manual
+    "USE_MANUAL_RECOVERY": True,
     "MANUAL_PROFILE": {
-        "SL_TP_MODE": "HYBRID",   # FIB / ATR / HYBRID
-        "RR": 1.5,                # RR TP untuk mode ATR
-        "FIB_TP_EXT": 1.618,      # FIB extension TP
-        "MIN_SL_PRICE": 3.0,      # SL minimal 3 poin
-        "MAX_SL_PRICE": 20.0,     # SL maksimal 20 poin
-        "CHECK_INTERVAL": 30,     # Cek tiap 30 detik
-        "OVERRIDE_EXISTING": False,  # Jangan override SL/TP yang sudah ada
+        "SL_TP_MODE": "HYBRID",
+        "RR": 1.5,
+        "FIB_TP_EXT": 1.618,
+        "MIN_SL_PRICE": 3.0,
+        "MAX_SL_PRICE": 20.0,
+        "CHECK_INTERVAL": 30,
+        "OVERRIDE_EXISTING": False,
     },
 
     # ----- FIB SL -----
-    "USE_FIB_SL": True,           # Pakai Fib SL
-    "SL_BUFFER": 1.0,             # Buffer 1 poin di SL Fib
-    "MIN_SL_DISTANCE": 4.0,       # SL minimal 4 poin dari entry
+    "USE_FIB_SL": True,
+    "SL_BUFFER": 1.0,
+    "MIN_SL_DISTANCE": 4.0,
 }
 
 
 # ============================================================
 # SECTION: CONFIG HELPERS
-# Fungsi baca/tulis config & state
 # ============================================================
 def _deep_merge(default, current):
     """Merge nested dict: default di-merge dengan current."""
@@ -190,24 +190,19 @@ def _deep_merge(default, current):
 
 
 def load_or_create_config(path=CONFIG_FILE):
-    """Load config dari file atau buat baru dengan default."""
+    """Load config dari file atau buat baru."""
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
-
-    # Kalau config tidak ada → buat baru
     if not path.exists():
         path.write_text(json.dumps(DEFAULT_CONFIG, indent=4, ensure_ascii=False) + "\n", encoding="utf-8")
         print("[OK] Config created:", path)
         return dict(DEFAULT_CONFIG)
-
-    # Coba baca config
     try:
         current = json.loads(path.read_text(encoding="utf-8"))
         if not isinstance(current, dict):
             raise ValueError("root not dict")
         print("[OK] Config loaded:", path)
     except Exception:
-        # Config corrupt → backup & buat baru
         backup = path.with_suffix(path.suffix + ".broken")
         try:
             path.replace(backup)
@@ -216,8 +211,6 @@ def load_or_create_config(path=CONFIG_FILE):
             pass
         path.write_text(json.dumps(DEFAULT_CONFIG, indent=4, ensure_ascii=False) + "\n", encoding="utf-8")
         return dict(DEFAULT_CONFIG)
-
-    # Merge dengan default (tambah key baru kalau ada)
     merged = _deep_merge(DEFAULT_CONFIG, current)
     if merged != current:
         path.write_text(json.dumps(merged, indent=4, ensure_ascii=False) + "\n", encoding="utf-8")
@@ -226,7 +219,7 @@ def load_or_create_config(path=CONFIG_FILE):
 
 
 def load_state(path=STATE_FILE):
-    """Load state dari file. Return {} kalau tidak ada."""
+    """Load state dari file."""
     path = Path(path)
     if not path.exists():
         return {}
@@ -246,7 +239,7 @@ def save_state(state, path=STATE_FILE):
 
 
 def log_error(exc_text):
-    """Log error ke file dengan timestamp."""
+    """Log error ke file."""
     try:
         from datetime import datetime as _dt
         with open(ERROR_LOG, "a", encoding="utf-8") as f:
@@ -257,27 +250,23 @@ def log_error(exc_text):
 
 # ============================================================
 # SECTION: BOOTSTRAP
-# Init config, MT5, colorama, console
 # ============================================================
 print("=" * 60)
-print("WEENfx PRO - v6.3.1")
+print("WEENfx PRO - v6.3.2")
 print("=" * 60)
 
-CONFIG = load_or_create_config()      # Load config
+CONFIG = load_or_create_config()
 
-# ----- MT5 IMPORT (setelah config) -----
 import MetaTrader5 as mt5
 
-# ----- INIT LIBRARIES -----
-init(autoreset=True)                  # Init colorama
-console = Console()                   # Init rich console
+init(autoreset=True)
+console = Console()
 
-# ----- RUNTIME GLOBALS -----
-runtime_message_text = ""             # Pesan untuk EVENT panel
+runtime_message_text = ""
 
 
 def timeframe_from_name(value):
-    """Konversi nama TF ("M5") ke konstanta MT5."""
+    """Konversi nama TF ke konstanta MT5."""
     if isinstance(value, int):
         return value
     mapping = {
@@ -289,13 +278,11 @@ def timeframe_from_name(value):
 
 
 def apply_config(c):
-    """Terapkan semua top-level config ke globals."""
+    """Terapkan config ke globals."""
     g = globals()
     for key, value in c.items():
-        # Skip nested dict (akses manual nanti)
         if key in ("SESSION_FILTER", "SESSION_TIMEZONE", "MANUAL_PROFILE"):
             continue
-        # Konversi timeframe string ke MT5 constant
         if key in ("TIMEFRAME_ENTRY", "TIMEFRAME_HTF", "TIMEFRAME_SMC"):
             g[key] = timeframe_from_name(value)
         else:
@@ -303,36 +290,26 @@ def apply_config(c):
 
 
 apply_config(CONFIG)
-# Setelah ini: SL_ATR_MULT, MAX_OPEN_POSITIONS, dll jadi global
 
-
-# ----- CONFIG SHORTCUTS -----
 SESSION_CONFIG = CONFIG.get("SESSION_FILTER", DEFAULT_CONFIG["SESSION_FILTER"])
 MANUAL_PROFILE = CONFIG.get("MANUAL_PROFILE", DEFAULT_CONFIG["MANUAL_PROFILE"])
 WIB = pytz.timezone(CONFIG.get("SESSION_TIMEZONE", "Asia/Jakarta"))
 SESSION_STATUS = "OUT OF SESSION"
 
 
-# ============================================================
-# SECTION: RUNTIME MESSAGE
-# Set pesan untuk EVENT panel
-# ============================================================
 def runtime_message(message):
+    """Set pesan runtime untuk EVENT panel."""
     global runtime_message_text
     try:
         txt = str(message)
-        # Replace [ ] karena rich parsing sebagai style
         txt = txt.replace("[", "(").replace("]", ")")
         runtime_message_text = txt[:250]
     except Exception:
         runtime_message_text = ""
 
 
-# ============================================================
-# SECTION: MT5 CONNECTION
-# Connect ke MT5 dengan retry
-# ============================================================
 def connect_mt5():
+    """Connect ke MT5 dengan retry."""
     print("[..] Connecting to MT5...")
     retries = 5
     delay = 5
@@ -357,10 +334,9 @@ if _account_info is None:
 
 # ============================================================
 # SECTION: DATA LAYER
-# Ambil data OHLC dari MT5
 # ============================================================
 def get_data(tf, bars=300):
-    """Ambil OHLC dari MT5. Return DataFrame."""
+    """Ambil OHLC dari MT5."""
     rates = mt5.copy_rates_from_pos(SYMBOL, tf, 0, bars)
     if rates is None:
         return pd.DataFrame()
@@ -368,7 +344,7 @@ def get_data(tf, bars=300):
 
 
 def get_closed_data(tf, bars=300):
-    """Ambil data + 1 candle, buang candle current (closed only)."""
+    """Ambil data closed only (buang candle current)."""
     df = get_data(tf, bars + 1)
     if df is None or df.empty or len(df) < 3:
         return pd.DataFrame()
@@ -392,7 +368,7 @@ def get_last_closed_candle_time(tf):
 
 
 def is_new_candle_mt5(tf):
-    """Cek apakah candle baru muncul (closed)."""
+    """Cek apakah candle baru muncul."""
     global last_candle_time
     current_candle_time = get_mt5_candle_time(tf)
     if current_candle_time is None:
@@ -407,7 +383,7 @@ def is_new_candle_mt5(tf):
 
 
 def get_live_price():
-    """Ambil bid/ask real-time."""
+    """Ambil bid/ask."""
     tick = mt5.symbol_info_tick(SYMBOL)
     if tick:
         return tick.bid, tick.ask
@@ -416,16 +392,14 @@ def get_live_price():
 
 # ============================================================
 # SECTION: STATE PERSISTENCE
-# POSITION_META & PARTIAL_STATE
 # ============================================================
-POSITION_META = {}    # {ticket: {model, sl_source, orig_volume, max_move, ...}}
-PARTIAL_STATE = {}    # {ticket: {tp1, tp2, tp3, tp1_done, vol1, vol2, ...}}
+POSITION_META = {}    # {ticket: {model, sl_source, orig_volume, max_move}}
+PARTIAL_STATE = {}    # {ticket: {tp1, tp2, tp3, tp1_done, vol1, vol2}}
 
 _state = load_state()
 _today_wib = datetime.now(WIB).date()
 _state_date = _state.get("daily_date")
 
-# Load daily state (reset kalau beda hari)
 if _state_date == str(_today_wib):
     daily_start_balance = float(_state.get("daily_start_balance", _account_info.balance))
     trading_disabled_today = bool(_state.get("trading_disabled_today", False))
@@ -434,7 +408,6 @@ else:
     trading_disabled_today = False
 daily_date = _today_wib
 
-# Load POSITION_META
 _pm_saved = _state.get("position_meta", {})
 if isinstance(_pm_saved, dict):
     for k, v in _pm_saved.items():
@@ -443,7 +416,6 @@ if isinstance(_pm_saved, dict):
         except (ValueError, TypeError):
             continue
 
-# Load PARTIAL_STATE
 _ps_saved = _state.get("partial_state", {})
 if isinstance(_ps_saved, dict):
     for k, v in _ps_saved.items():
@@ -454,7 +426,7 @@ if isinstance(_ps_saved, dict):
 
 
 def persist_state():
-    """Simpan POSITION_META, PARTIAL_STATE, daily state."""
+    """Simpan state ke file."""
     try:
         save_state({
             "daily_date": str(daily_date),
@@ -467,7 +439,7 @@ def persist_state():
         pass
 
 
-persist_state()   # Simpan saat startup
+persist_state()
 
 
 # ============================================================
@@ -506,7 +478,6 @@ def get_higher_timeframe_trend():
         return "BULLISH"
     elif ema20 < ema50:
         return "BEARISH"
-    # Fallback ke M15
     fallback = trend_m5()
     if fallback != "SIDEWAYS":
         return fallback
@@ -517,7 +488,7 @@ def get_higher_timeframe_trend():
 # SECTION: ATR
 # ============================================================
 def atr_value(df):
-    """Hitung ATR (14 period) dari DataFrame."""
+    """Hitung ATR (14 period)."""
     if df is None or len(df) < 15:
         return None
     prev_close = df['close'].shift(1)
@@ -532,14 +503,14 @@ def atr_value(df):
 
 
 def get_atr_current(df=None):
-    """Ambil nilai ATR saat ini."""
+    """ATR saat ini."""
     if df is None:
         df = get_closed_data(TIMEFRAME_ENTRY, bars=100)
     return atr_value(df)
 
 
 def calculate_atr_series(df, period=14):
-    """Tambah kolom ATR ke DataFrame (untuk seluruh series)."""
+    """Tambah kolom ATR ke DataFrame."""
     df['tr'] = np.maximum(df['high'] - df['low'],
                           np.maximum(abs(df['high'] - df['close'].shift(1)),
                                      abs(df['low'] - df['close'].shift(1))))
@@ -551,7 +522,7 @@ def calculate_atr_series(df, period=14):
 # SECTION: SWING & STRUCTURE
 # ============================================================
 def detect_swing_points(df, lookback=10):
-    """Cari swing high/low dengan window lookback."""
+    """Cari swing high/low."""
     highs = []
     lows = []
     if df is None or len(df) < lookback * 2 + 1:
@@ -573,7 +544,7 @@ def detect_swing_points(df, lookback=10):
 
 
 def detect_choch(df, swing_strictness=3):
-    """Deteksi Change of Character (break struktur)."""
+    """Deteksi Change of Character."""
     if df is None or len(df) < 20:
         return None
 
@@ -620,14 +591,14 @@ def detect_choch(df, swing_strictness=3):
 # SECTION: PATTERN
 # ============================================================
 def _signal_candle(df):
-    """Ambil candle terakhir (signal candle)."""
+    """Candle terakhir."""
     if df is None or len(df) < 1:
         return None
     return df.iloc[-1]
 
 
 def detect_rejection_wick(df):
-    """Deteksi wick rejection (bull/bear)."""
+    """Deteksi wick rejection."""
     candle = _signal_candle(df)
     if candle is None:
         return None
@@ -644,7 +615,7 @@ def detect_rejection_wick(df):
 
 
 def detect_order_block(df, atr=None):
-    """Deteksi order block (base + impulse candle)."""
+    """Deteksi order block."""
     if df is None or len(df) < 5:
         return None
     if atr is None:
@@ -664,7 +635,7 @@ def detect_order_block(df, atr=None):
 
 
 def detect_fvg(df, atr=None):
-    """Deteksi Fair Value Gap (3 candle)."""
+    """Deteksi Fair Value Gap."""
     if df is None or len(df) < 3:
         return None
     a, b, c = df.iloc[-3], df.iloc[-2], df.iloc[-1]
@@ -679,7 +650,7 @@ def detect_fvg(df, atr=None):
 
 
 def detect_divergence(df, direction, lookback=15):
-    """Deteksi divergence sederhana (high/low vs close)."""
+    """Deteksi divergence sederhana."""
     if df is None or len(df) < lookback + 2:
         return False
     try:
@@ -699,7 +670,7 @@ def detect_divergence(df, direction, lookback=15):
 
 
 def fake_breakout_filter(df):
-    """Deteksi fake breakout (body kecil / close sama)."""
+    """Deteksi fake breakout."""
     if len(df) < 2:
         return False
     last = df.iloc[-1]
@@ -718,10 +689,9 @@ def fake_breakout_filter(df):
 
 # ============================================================
 # SECTION: SMC ZONES
-# Demand/Supply detection
 # ============================================================
 def detect_demand_zones(df, sensitivity=0.10):
-    """Deteksi zona demand (candle bearish + break high)."""
+    """Deteksi zona demand."""
     zones = []
     df = calculate_atr_series(df.copy())
     if len(df) < 20:
@@ -747,7 +717,7 @@ def detect_demand_zones(df, sensitivity=0.10):
 
 
 def detect_supply_zones(df, sensitivity=0.10):
-    """Deteksi zona supply (candle bullish + break low)."""
+    """Deteksi zona supply."""
     zones = []
     df = calculate_atr_series(df.copy())
     if len(df) < 20:
@@ -773,7 +743,7 @@ def detect_supply_zones(df, sensitivity=0.10):
 
 
 def price_in_smc_zone(price, zones, zone_type=None, tolerance=0.0):
-    """Cek apakah harga di dalam zona SMC."""
+    """Cek harga di zona SMC."""
     if not zones or price is None:
         return False, None
     for zone in zones:
@@ -792,10 +762,10 @@ def price_in_smc_zone(price, zones, zone_type=None, tolerance=0.0):
 
 
 # ============================================================
-# SECTION: LIQUIDITY SWEEP (v6.2 — ketat)
-# Sweep valid: wick break + close reclaim + displacement
+# SECTION: LIQUIDITY SWEEP
 # ============================================================
 def smart_liquidity_sweep(df, direction, lookback=None, atr_raw=None):
+    """Sweep valid: wick break + close reclaim + displacement."""
     if lookback is None:
         lookback = SWEEP_LOOKBACK
     if df is None or len(df) < lookback + 3:
@@ -806,14 +776,13 @@ def smart_liquidity_sweep(df, direction, lookback=None, atr_raw=None):
     if atr_raw is None or atr_raw <= 0:
         return False
 
-    min_displacement = atr_raw * 0.5   # Body minimal = 0.5 × ATR
+    min_displacement = atr_raw * 0.5
 
     try:
-        reference = df.iloc[-lookback - 1:-1]   # Lookback candle (exclude 2 terakhir)
+        reference = df.iloc[-lookback - 1:-1]
         recent_high = float(reference['high'].max())
         recent_low = float(reference['low'].min())
 
-        # Cek 2 candle terakhir
         for offset in (1, 2):
             if offset > len(df):
                 continue
@@ -821,12 +790,10 @@ def smart_liquidity_sweep(df, direction, lookback=None, atr_raw=None):
             body = abs(candle['close'] - candle['open'])
 
             if direction == "BUY":
-                # Wick bawah tembus recent_low, close kembali di atas
                 swept = candle['low'] < recent_low and candle['close'] > recent_low
                 if swept and body >= min_displacement:
                     return True
             if direction == "SELL":
-                # Wick atas tembus recent_high, close kembali di bawah
                 swept = candle['high'] > recent_high and candle['close'] < recent_high
                 if swept and body >= min_displacement:
                     return True
@@ -837,28 +804,27 @@ def smart_liquidity_sweep(df, direction, lookback=None, atr_raw=None):
 
 # ============================================================
 # SECTION: FIBONACCI
-# Retracement & Extension
 # ============================================================
 def fib_retracement(swing_low, swing_high, level):
-    """Hitung level fib retracement."""
+    """Fib retracement."""
     diff = swing_high - swing_low
     return swing_low + diff * (1 - level)
 
 
 def fib_extension(swing_low, swing_high, level):
-    """FIB extension untuk BUY (TP di atas)."""
+    """Fib extension BUY."""
     diff = swing_high - swing_low
     return swing_low + diff * level
 
 
 def fib_extension_sell(swing_low, swing_high, level):
-    """FIB extension untuk SELL (TP di bawah)."""
+    """Fib extension SELL."""
     diff = swing_high - swing_low
     return swing_high - diff * level
 
 
 def find_last_swing_for_fib(df, direction, lookback=None):
-    """Cari swing low/high terakhir untuk fib."""
+    """Cari swing low/high terakhir."""
     if lookback is None:
         lookback = SWING_FIB_LOOKBACK
     if df is None or len(df) < 30:
@@ -867,7 +833,6 @@ def find_last_swing_for_fib(df, direction, lookback=None):
     highs, lows = detect_swing_points(df, SWING_STRICTNESS)
 
     if direction == "BUY":
-        # Cari low terakhir, lalu high setelahnya
         if highs and lows:
             last_low_idx, last_low_price = lows[-1]
             future_highs = [h for h in highs if h[0] > last_low_idx]
@@ -875,7 +840,6 @@ def find_last_swing_for_fib(df, direction, lookback=None):
                 swing_high_price = max(h[1] for h in future_highs)
                 if swing_high_price > last_low_price:
                     return last_low_price, swing_high_price
-        # Fallback: min/max dari recent
         recent = df.tail(lookback)
         if len(recent) < 10:
             return None, None
@@ -885,7 +849,6 @@ def find_last_swing_for_fib(df, direction, lookback=None):
             return swing_low_price, swing_high_price
         return None, None
     else:
-        # Cari high terakhir, lalu low setelahnya
         if highs and lows:
             last_high_idx, last_high_price = highs[-1]
             future_lows = [l for l in lows if l[0] > last_high_idx]
@@ -904,7 +867,7 @@ def find_last_swing_for_fib(df, direction, lookback=None):
 
 
 def in_fib_zone(price, swing_low, swing_high, zone_low, zone_high):
-    """Cek apakah harga di antara 2 level fib."""
+    """Cek harga di zona fib."""
     if None in (price, swing_low, swing_high):
         return False
     level_a = fib_retracement(swing_low, swing_high, zone_low)
@@ -944,7 +907,6 @@ def resolve_fib_sl(swing_low, swing_high, direction, entry):
 
 # ============================================================
 # SECTION: SESSION
-# Deteksi session trading (WIB)
 # ============================================================
 def _minutes(hhmm):
     h, m = map(int, str(hhmm).split(":"))
@@ -962,7 +924,7 @@ def _in_time_range(now_minutes, start, end):
 
 
 def detect_sessions():
-    """Deteksi session aktif saat ini."""
+    """Deteksi session aktif."""
     global SESSION_STATUS
     now = datetime.now(WIB)
     now_minutes = now.hour * 60 + now.minute
@@ -1008,12 +970,11 @@ def get_session_status_text():
 
 # ============================================================
 # SECTION: DAILY LOSS
-# Reset harian & disable trading
 # ============================================================
 def check_daily_loss():
+    """Cek daily loss & disable trading."""
     global daily_start_balance, daily_date, trading_disabled_today
     now = datetime.now(WIB).date()
-    # Reset daily kalau tanggal berubah
     if now != daily_date:
         daily_date = now
         account = mt5.account_info()
@@ -1036,7 +997,6 @@ def check_daily_loss():
 
 # ============================================================
 # SECTION: MODEL BASE CLASS
-# Base class untuk 3 model (CONTINUATION, REVERSAL, SWEEP)
 # ============================================================
 class BaseModel:
     NAME = "BASE"
@@ -1047,12 +1007,12 @@ class BaseModel:
     HTF_REQUIRED = True
 
     def __init__(self, ctx):
-        self.ctx = ctx   # Context (data analisis)
+        self.ctx = ctx
         self.result = {
             "model": self.NAME,
-            "passed": False,        # Lolos gate?
-            "direction": None,      # BUY/SELL
-            "reason": "",           # Alasan gagal
+            "passed": False,
+            "direction": None,
+            "reason": "",
             "swing_low": None,
             "swing_high": None,
             "fib_ok": False,
@@ -1063,10 +1023,8 @@ class BaseModel:
         }
 
     def _diag(self, reason):
-        """Set alasan gagal."""
         self.result["reason"] = reason
 
-    # ----- Gate 1: HTF Trend -----
     def gate_htf(self):
         if not self.HTF_REQUIRED:
             return True
@@ -1076,7 +1034,6 @@ class BaseModel:
             return False
         return True
 
-    # ----- Gate 2: Zona SMC (POI) -----
     def gate_zone(self, direction):
         df_ltf = self.ctx["df_ltf"]
         atr_now = self.ctx.get("atr_now", 3.0)
@@ -1094,7 +1051,6 @@ class BaseModel:
         self.result["poi_zone"] = zone
         return True
 
-    # ----- Gate 3: Konfirmasi -----
     def gate_confirmation(self, direction, has_sweep):
         choch_ok = (
             (direction == "BUY" and self.ctx.get("choch_ltf") == "BULL_CHoCH") or
@@ -1118,14 +1074,12 @@ class BaseModel:
             self._diag(f"REVERSAL confirm={confirmations}/3 (need 3)")
             return False
 
-        # CONTINUATION: 2 dari 3
         confirmations = sum([has_sweep, choch_ok, wick_ok])
         if confirmations >= 2:
             return True
         self._diag(f"confirm={confirmations}/3 (need 2)")
         return False
 
-    # ----- Gate 4: Swing valid -----
     def gate_swing(self, direction):
         df_ltf = self.ctx["df_ltf"]
         swing_low, swing_high = find_last_swing_for_fib(df_ltf, direction)
@@ -1140,7 +1094,6 @@ class BaseModel:
         self.result["swing_high"] = swing_high
         return True
 
-    # ----- Gate 5: Fibonacci zone -----
     def gate_fib(self, direction):
         df_ltf = self.ctx["df_ltf"]
         entry_price = df_ltf['close'].iloc[-1]
@@ -1161,8 +1114,7 @@ class BaseModel:
 
 
 # ============================================================
-# SECTION: CONTINUATION MODEL (logika v5.4)
-# Follow trend. Konfirmasi 1 dari 4 (LTF atau HTF).
+# SECTION: CONTINUATION MODEL (v5.4 logic)
 # ============================================================
 class ContinuationModel(BaseModel):
     NAME = "CONTINUATION"
@@ -1171,7 +1123,7 @@ class ContinuationModel(BaseModel):
     HTF_REQUIRED = True
 
     def evaluate(self):
-        # 1. Cek HTF
+        """CONTINUATION: 1 dari 4 konfirmasi (LTF atau HTF)."""
         if not self.gate_htf():
             return self.result
 
@@ -1179,11 +1131,9 @@ class ContinuationModel(BaseModel):
         direction = "BUY" if htf == "BULLISH" else "SELL"
         self.result["direction"] = direction
 
-        # 2. Cek POI zone
         if not self.gate_zone(direction):
             return self.result
 
-        # 3. Konfirmasi 1 dari 4: CHoCH/wick LTF atau HTF
         df_ltf = self.ctx["df_ltf"]
         df_htf = self.ctx.get("df_htf", df_ltf)
         ltf_choch = self.ctx.get("choch_ltf")
@@ -1209,11 +1159,9 @@ class ContinuationModel(BaseModel):
         self.result["wick"] = ltf_rej
         self.result["sweep"] = False
 
-        # 4. Cek swing
         if not self.gate_swing(direction):
             return self.result
 
-        # 5. Cek fib
         if not self.gate_fib(direction):
             return self.result
 
@@ -1222,8 +1170,7 @@ class ContinuationModel(BaseModel):
 
 
 # ============================================================
-# SECTION: REVERSAL MODEL (logika v5.4)
-# 4 jalur masuk: sweep+confirm, choch+wick, choch-only, wick-only.
+# SECTION: REVERSAL MODEL (v5.4 logic)
 # ============================================================
 class ReversalModel(BaseModel):
     NAME = "REVERSAL"
@@ -1232,12 +1179,12 @@ class ReversalModel(BaseModel):
     HTF_REQUIRED = False
 
     def evaluate(self):
+        """REVERSAL: 4 jalur masuk."""
         mss = self.ctx.get("choch_ltf")
         rej = self.ctx.get("wick_ltf")
         sweep_buy = self.ctx.get("sweep_buy", False)
         sweep_sell = self.ctx.get("sweep_sell", False)
 
-        # 1. Tentukan arah: prioritas CHoCH > wick > sweep
         direction = None
         if mss == "BULL_CHoCH":
             direction = "BUY"
@@ -1273,20 +1220,19 @@ class ReversalModel(BaseModel):
             (direction == "SELL" and rej == "BEAR")
         )
 
-        # 2. 4 jalur masuk
+        # 4 jalur masuk
         if has_sweep and (choch_ok or wick_ok):
-            pass                              # Jalur A
+            pass
         elif choch_ok and wick_ok:
-            pass                              # Jalur B
+            pass
         elif choch_ok and not has_sweep and not wick_ok:
-            self._diag(f"choch-only({mss})")  # Jalur C
+            self._diag(f"choch-only({mss})")
         elif wick_ok and not has_sweep and not choch_ok:
-            self._diag(f"wick-only({rej})")   # Jalur D
+            self._diag(f"wick-only({rej})")
         else:
             self._diag(f"no-confirm(sweep={has_sweep},choch={mss},wick={rej})")
             return self.result
 
-        # 3. Cek POI zone
         if not self.gate_zone(direction):
             return self.result
 
@@ -1294,11 +1240,9 @@ class ReversalModel(BaseModel):
         self.result["wick"] = rej
         self.result["sweep"] = has_sweep
 
-        # 4. Cek swing
         if not self.gate_swing(direction):
             return self.result
 
-        # 5. Cek fib
         if not self.gate_fib(direction):
             return self.result
 
@@ -1307,8 +1251,7 @@ class ReversalModel(BaseModel):
 
 
 # ============================================================
-# SECTION: SWEEP MODEL (logika v5.4)
-# Hanya sweep + wick (tanpa CHoCH).
+# SECTION: SWEEP MODEL (v5.4 logic)
 # ============================================================
 class SweepModel(BaseModel):
     NAME = "SWEEP"
@@ -1317,10 +1260,10 @@ class SweepModel(BaseModel):
     HTF_REQUIRED = False
 
     def evaluate(self):
+        """SWEEP: hanya sweep + wick."""
         sweep_buy = self.ctx.get("sweep_buy", False)
         sweep_sell = self.ctx.get("sweep_sell", False)
 
-        # 1. Tentukan arah dari sweep
         direction = None
         if sweep_buy:
             direction = "BUY"
@@ -1333,7 +1276,6 @@ class SweepModel(BaseModel):
 
         self.result["direction"] = direction
 
-        # 2. Wajib wick searah
         wick = self.ctx.get("wick_ltf")
         if direction == "BUY" and wick != "BULL":
             self._diag(f"no-Wick({wick})")
@@ -1342,18 +1284,15 @@ class SweepModel(BaseModel):
             self._diag(f"no-Wick({wick})")
             return self.result
 
-        # 3. Cek POI zone
         if not self.gate_zone(direction):
             return self.result
 
         self.result["wick"] = wick
         self.result["sweep"] = True
 
-        # 4. Cek swing
         if not self.gate_swing(direction):
             return self.result
 
-        # 5. Cek fib
         if not self.gate_fib(direction):
             return self.result
 
@@ -1363,49 +1302,43 @@ class SweepModel(BaseModel):
 
 # ============================================================
 # SECTION: CONFLUENCE SCORE
-# Skor 0-100 untuk model yang lolos gate
 # ============================================================
 def calculate_confluence(model_result, ctx, session_ok):
+    """Skor 0-100 untuk model yang lolos gate."""
     if not model_result or not model_result.get("passed"):
         return 0, []
 
     score = 0
-    met = []   # List tag yang terpenuhi
+    met = []
     direction = model_result["direction"]
 
-    # 1. HTF align (20)
     htf = ctx.get("htf_trend", "SIDEWAYS")
     want_htf = "BULLISH" if direction == "BUY" else "BEARISH"
     if htf == want_htf:
         score += 20
         met.append("HTF")
 
-    # 2. POI zone (20)
     if model_result.get("poi_zone"):
         score += 20
         met.append("POI")
 
-    # 3. CHoCH (15)
     if model_result.get("choch"):
         score += 15
         met.append("CHoCH")
 
-    # 4. Wick (10)
     if model_result.get("wick"):
         score += 10
         met.append("WICK")
 
-    # 5. Fib OTE (15)
     if model_result.get("fib_ok"):
         score += 15
         met.append("FIB")
 
-    # 6. Session (10)
     if session_ok:
         score += 10
         met.append("SESSION")
 
-    met.append("RR_PENDING")   # Placeholder, diisi setelah hitung TP
+    met.append("RR_PENDING")
     return score, met
 
 
@@ -1443,19 +1376,17 @@ def evaluate_all_models(ctx, session_ok):
 
 # ============================================================
 # SECTION: SL RESOLVER
-# Fib dulu, fallback ATR
 # ============================================================
 def resolve_sl(entry, direction, atr_raw, swing_low=None, swing_high=None):
+    """Fib SL dulu, fallback ATR."""
     if atr_raw is None or atr_raw <= 0:
         return None, "no-atr"
 
-    # Coba Fib SL
     if USE_FIB_SL and swing_low is not None and swing_high is not None:
         fib_sl = resolve_fib_sl(swing_low, swing_high, direction, entry)
         if fib_sl is not None:
             return fib_sl, "FIB"
 
-    # Fallback ATR
     sl_distance = atr_raw * float(SL_ATR_MULT)
     if direction == "BUY":
         sl = entry - sl_distance
@@ -1509,15 +1440,12 @@ def validate_tp(tp_plan, entry, sl, direction):
     reward = abs(tp_plan["tp3"] - entry)
     rr = reward / risk
 
-    # RR > hard max → tolak
     if rr > hard_max_rr:
         return False, rr, tp_plan
 
-    # RR valid
     if rr >= min_rr:
         return True, rr, tp_plan
 
-    # RR < min → adjust TP3 ke min
     if direction == "BUY":
         adjusted = entry + risk * min_rr
         if adjusted < tp_plan["tp3"]:
@@ -1572,7 +1500,7 @@ def calculate_lot_by_confluence(confluence_score, symbol_info=None):
 # SECTION: GUARDS
 # ============================================================
 def check_margin_guard(lot, symbol_info=None):
-    """Cek apakah margin cukup."""
+    """Cek margin."""
     try:
         if symbol_info is None:
             symbol_info = mt5.symbol_info(SYMBOL)
@@ -1603,10 +1531,10 @@ def check_margin_guard(lot, symbol_info=None):
 
 
 # ============================================================
-# SECTION: RISK CALCULATOR (all-in-one)
+# SECTION: RISK CALCULATOR
 # ============================================================
 def calculate_risk(model_result, entry, atr_raw, symbol_info, session_ok):
-    """Hitung semua parameter risk untuk model yang lolos gate."""
+    """Hitung semua parameter risk."""
     result = {
         "ok": False, "reason": "", "sl": None, "sl_source": "",
         "tp_plan": None, "rr": 0.0, "lot": 0.0,
@@ -1616,7 +1544,7 @@ def calculate_risk(model_result, entry, atr_raw, symbol_info, session_ok):
 
     direction = model_result["direction"]
 
-    # 1. Hitung SL
+    # 1. SL
     sl, sl_source = resolve_sl(
         entry, direction, atr_raw,
         swing_low=model_result.get("swing_low"),
@@ -1628,7 +1556,7 @@ def calculate_risk(model_result, entry, atr_raw, symbol_info, session_ok):
     result["sl"] = sl
     result["sl_source"] = sl_source
 
-    # 2. Hitung TP plan
+    # 2. TP plan
     tp_plan = resolve_tp(entry, sl, direction)
     if tp_plan is None:
         result["reason"] = "TP=None skip"
@@ -1645,7 +1573,7 @@ def calculate_risk(model_result, entry, atr_raw, symbol_info, session_ok):
     result["tp_plan"] = tp_plan
     result["rr"] = rr
 
-    # 4. Update confluence dengan RR score
+    # 4. Update confluence dengan RR
     conf_score = result["confluence"]
     conf_met = result["confluence_met"]
     conf_score, conf_met = add_rr_score(conf_score, conf_met, rr)
@@ -1658,11 +1586,11 @@ def calculate_risk(model_result, entry, atr_raw, symbol_info, session_ok):
         result["reason"] = f"conf {conf_score}% < {int(min_conf)}%"
         return result
 
-    # 6. Hitung lot
+    # 6. Lot
     lot = calculate_lot_by_confluence(conf_score, symbol_info)
     result["lot"] = lot
 
-    # 7. Cek margin
+    # 7. Margin
     margin_ok, margin_reason = check_margin_guard(lot, symbol_info)
     if not margin_ok:
         result["reason"] = margin_reason
@@ -1674,17 +1602,21 @@ def calculate_risk(model_result, entry, atr_raw, symbol_info, session_ok):
 
 # ============================================================
 # SECTION: PARTIAL CLOSE PLAN
-# Hybrid mode: LOT atau PERCENT
+# v6.3.2: PERCENT 33/33/34
 # ============================================================
 def _round_to_step(vol, step):
-    """Bulatkan volume ke bawah sesuai step."""
+    """Bulatkan volume ke step broker (pakai round(), bukan floor)."""
     if step <= 0:
         return vol
     return round(vol / step) * step
 
 
 def register_partial_plan(ticket, tp_plan, orig_volume, model_name, entry_price, direction):
-    """Daftarkan rencana partial close."""
+    """
+    Daftarkan rencana partial close.
+    Mode PERCENT: 33% TP1, 33% TP2, sisa broker TP3.
+    Mode LOT: TP1=tetap, TP2=tetap.
+    """
     symbol_info = mt5.symbol_info(SYMBOL)
     if symbol_info is None:
         return
@@ -1693,31 +1625,31 @@ def register_partial_plan(ticket, tp_plan, orig_volume, model_name, entry_price,
     vol_step = float(symbol_info.volume_step or 0.01)
     lot = float(orig_volume)
 
-    # Cek lot minimum
+    # Cek lot minimal
     min_lot_for_partial = float(CONFIG.get("PARTIAL_MIN_LOT", 0.03))
     if lot < min_lot_for_partial:
         runtime_message(f"Partial #{ticket}: lot {lot} < min {min_lot_for_partial}, skip")
         return
 
-    mode = str(CONFIG.get("PARTIAL_MODE", "LOT")).upper()
+    mode = str(CONFIG.get("PARTIAL_MODE", "PERCENT")).upper()
 
     # Hitung volume per TP
     if mode == "LOT":
         raw1 = float(CONFIG.get("PARTIAL_LOT_1", 0.01))
         raw2 = float(CONFIG.get("PARTIAL_LOT_2", 0.01))
-    else:
-        pct1 = float(CONFIG.get("PARTIAL_PCT_1", 50))
-        pct2 = float(CONFIG.get("PARTIAL_PCT_2", 50))
-        raw1 = lot * (pct1 / 100.0)
-        raw2 = lot * (pct2 / 100.0)
+    else:  # PERCENT
+        pct1 = float(CONFIG.get("PARTIAL_PCT_1", 33))
+        pct2 = float(CONFIG.get("PARTIAL_PCT_2", 33))
+        raw1 = lot * (pct1 / 100.0)   # Contoh: 0.03 × 0.33 = 0.0099
+        raw2 = lot * (pct2 / 100.0)   # Contoh: 0.06 × 0.33 = 0.0198
 
-    v1 = _round_to_step(raw1, vol_step)
-    v2 = _round_to_step(raw2, vol_step)
+    v1 = _round_to_step(raw1, vol_step)   # 0.0099 → 0.01
+    v2 = _round_to_step(raw2, vol_step)   # 0.0198 → 0.02
 
     tp1_en = v1 >= vol_min and v1 < lot
     tp2_en = v2 >= vol_min and v2 < lot
 
-    # Cek total tidak melebihi lot
+    # Pastikan total tidak melebihi lot
     total_vol = (v1 if tp1_en else 0) + (v2 if tp2_en else 0)
     if total_vol >= lot:
         if tp2_en:
@@ -1758,7 +1690,7 @@ def register_partial_plan(ticket, tp_plan, orig_volume, model_name, entry_price,
 
 
 # ============================================================
-# SECTION: REBUILD (v6.3.1)
+# SECTION: REBUILD (v6.3.2)
 # Pulihkan POSITION_META & PARTIAL_STATE setelah restart
 # ============================================================
 def rebuild_position_meta():
@@ -1769,7 +1701,7 @@ def rebuild_position_meta():
             return
         for pos in positions:
             if pos.ticket in POSITION_META:
-                continue   # Sudah ada, skip
+                continue
 
             # Parse model dari comment order
             comment = pos.comment or ""
@@ -1786,7 +1718,7 @@ def rebuild_position_meta():
             else:
                 model_name = "RECOVERED"
 
-            # Hitung max_move dari SL saat ini (perkiraan)
+            # Perkiraan max_move dari SL
             max_move = 0.0
             if pos.sl and pos.sl > 0:
                 if pos.type == 0 and pos.sl > pos.price_open:
@@ -1808,14 +1740,17 @@ def rebuild_position_meta():
 
 
 def rebuild_partial_plans():
-    """Rebuild PARTIAL_STATE dari posisi terbuka."""
+    """
+    Rebuild PARTIAL_STATE dari posisi terbuka.
+    v6.3.2: pakai RR (bukan 0.5/0.75) supaya konsisten dengan posisi baru.
+    """
     try:
         positions = mt5.positions_get(symbol=SYMBOL)
         if not positions:
             return
         for pos in positions:
             if pos.ticket in PARTIAL_STATE:
-                continue   # Sudah ada, skip
+                continue
 
             meta = POSITION_META.get(pos.ticket, {})
             model_name = meta.get("model", "")
@@ -1841,7 +1776,7 @@ def rebuild_partial_plans():
             if risk <= 0:
                 continue
 
-            # Hitung TP1, TP2 dari RR × risk
+            # v6.3.2 FIX: pakai RR, bukan dist × 0.5 / 0.75
             rr1 = float(CONFIG.get("TP_RR_TP1", 1.0))
             rr2 = float(CONFIG.get("TP_RR_TP2", 2.0))
 
@@ -1899,7 +1834,7 @@ def _get_supported_filling(symbol_info):
 
 
 def _close_partial(position, close_volume, symbol_info):
-    """Tutup sebagian posisi (partial close)."""
+    """Tutup sebagian posisi."""
     try:
         close_volume = max(symbol_info.volume_min,
                            round(close_volume / symbol_info.volume_step) * symbol_info.volume_step)
@@ -1952,9 +1887,9 @@ def _close_partial(position, close_volume, symbol_info):
 
 # ============================================================
 # SECTION: MANAGE PARTIAL CLOSE
-# TP1/TP2 partial, TP3 broker
 # ============================================================
 def manage_partial_close():
+    """Kelola partial close TP1/TP2."""
     try:
         positions = mt5.positions_get(symbol=SYMBOL)
         if not positions:
@@ -1965,7 +1900,7 @@ def manage_partial_close():
         if symbol_info is None:
             return
 
-        # Bersihkan plan untuk posisi yang sudah closed
+        # Bersihkan plan untuk posisi closed
         active_tickets = {p.ticket for p in positions}
         for tk in list(PARTIAL_STATE.keys()):
             if tk not in active_tickets:
@@ -1984,7 +1919,7 @@ def manage_partial_close():
                 continue
             current = tick.bid if pos.type == 0 else tick.ask
 
-            # === TP1 ===
+            # TP1
             if plan.get("tp1_enabled") and not plan.get("tp1_done"):
                 hit = (pos.type == 0 and current >= plan["tp1"]) or \
                       (pos.type == 1 and current <= plan["tp1"])
@@ -1996,7 +1931,7 @@ def manage_partial_close():
                         runtime_message(f"TP1 hit #{pos.ticket} @ {plan['tp1']:.2f} vol {vol:g}")
                     continue
 
-            # === TP2 ===
+            # TP2
             if plan.get("tp1_done") and plan.get("tp2_enabled") and not plan.get("tp2_done"):
                 hit = (pos.type == 0 and current >= plan["tp2"]) or \
                       (pos.type == 1 and current <= plan["tp2"])
@@ -2008,7 +1943,7 @@ def manage_partial_close():
                         runtime_message(f"TP2 hit #{pos.ticket} @ {plan['tp2']:.2f} vol {vol:g}")
                     continue
 
-            # === TP3: hanya set flag (broker tutup sisa) ===
+            # TP3: hanya set flag (broker tutup sisa)
             if plan.get("tp2_done") and not plan.get("tp3_done"):
                 hit = (pos.type == 0 and current >= plan["tp3"]) or \
                       (pos.type == 1 and current <= plan["tp3"])
@@ -2017,13 +1952,12 @@ def manage_partial_close():
                     persist_state()
                     runtime_message(f"TP3 hit #{pos.ticket} @ {plan['tp3']:.2f} (broker close)")
 
-
     except Exception:
         log_error(f"manage_partial_close: {traceback.format_exc()}")
 
 
 # ============================================================
-# SECTION: BREAK EVEN (ATR-based)
+# SECTION: BREAK EVEN
 # ============================================================
 def manage_break_even():
     """BE aktif saat profit ≥ BE_TRIGGER_ATR × ATR."""
@@ -2045,7 +1979,7 @@ def manage_break_even():
         if not model_name:
             continue
 
-        # Skip kalau SL sudah di BE atau lebih baik
+        # Skip kalau SL sudah di BE atau lebih
         if pos.sl and pos.sl > 0:
             if pos.type == 0 and pos.sl >= pos.price_open:
                 continue
@@ -2065,7 +1999,6 @@ def manage_break_even():
         if move < be_trigger:
             continue
 
-        # Pindah SL ke entry + 0.1
         if pos.type == 0:
             new_sl = round(pos.price_open + 0.1, digits)
             old_sl = pos.sl if pos.sl and pos.sl > 0 else -1e9
@@ -2093,10 +2026,10 @@ def manage_break_even():
 
 
 # ============================================================
-# SECTION: TRAILING SL (ATR-based + max_move)
-# Pakai max_move historis supaya SL tidak mundur
+# SECTION: TRAILING SL (max_move historis)
 # ============================================================
 def manage_trailing_sl():
+    """Trailing aktif setelah profit ≥ TRAIL_TRIGGER_ATR × ATR."""
     positions = mt5.positions_get(symbol=SYMBOL)
     if not positions:
         return
@@ -2118,7 +2051,6 @@ def manage_trailing_sl():
         if not model_name:
             continue
 
-        # Hitung pergerakan harga saat ini
         if pos.type == 0:
             current_move = pos.price_current - pos.price_open
         else:
@@ -2167,7 +2099,6 @@ def manage_trailing_sl():
 
 # ============================================================
 # SECTION: MANUAL RECOVERY
-# Untuk posisi manual (bukan dari EA)
 # ============================================================
 def calculate_dynamic_sl(atr=None):
     """Hitung SL dari ATR."""
@@ -2187,7 +2118,6 @@ def _recover_manual_position(pos, symbol_info, atr_raw, digits):
     min_sl_price = float(MANUAL_PROFILE.get("MIN_SL_PRICE", 3.0))
     max_sl_price = float(MANUAL_PROFILE.get("MAX_SL_PRICE", 20.0))
 
-    # Coba FIB dulu
     if mode in ("FIB", "HYBRID") and USE_FIB_SL:
         try:
             df_entry = get_closed_data(TIMEFRAME_ENTRY, bars=100)
@@ -2211,7 +2141,6 @@ def _recover_manual_position(pos, symbol_info, atr_raw, digits):
         except Exception as e:
             runtime_message(f"Manual FIB calc: {e}")
 
-    # Fallback ATR
     if mode in ("ATR", "HYBRID"):
         sl_price_dist = calculate_dynamic_sl(atr=atr_raw)
         sl_price_dist = max(min_sl_price, min(max_sl_price, sl_price_dist))
@@ -2246,7 +2175,7 @@ def recover_manual_entries():
 
         for pos in positions:
             if pos.magic == int(CONFIG.get("MAGIC", 777777)):
-                continue   # Skip posisi EA
+                continue
             if pos.ticket in POSITION_META:
                 continue
             if not override and (pos.sl != 0 or pos.tp != 0):
@@ -2283,7 +2212,6 @@ def recover_manual_entries():
 
 # ============================================================
 # SECTION: RETRACE AFTER TP3
-# Setelah TP3, tunggu retrace + CHoCH M15 sebelum re-entry
 # ============================================================
 def get_choch_m15():
     try:
@@ -2296,7 +2224,7 @@ def get_choch_m15():
 
 
 def check_reentry_after_tp3(direction, current_price):
-    """Cek apakah re-entry boleh setelah TP3 hit."""
+    """Cek re-entry setelah TP3 hit (retrace + CHoCH M15)."""
     positions = mt5.positions_get(symbol=SYMBOL)
     if not positions:
         return True, "no positions"
@@ -2304,7 +2232,6 @@ def check_reentry_after_tp3(direction, current_price):
     ref_entry = None
     ref_tp3 = None
 
-    # Cari posisi dengan TP3 done sebagai referensi
     for p in positions:
         meta_p = POSITION_META.get(p.ticket, {})
         if meta_p.get("model") not in ("CONTINUATION", "REVERSAL", "SWEEP"):
@@ -2335,7 +2262,6 @@ def check_reentry_after_tp3(direction, current_price):
     if total_move <= 0:
         return True, "zero move"
 
-    # Cek retrace
     retrace_pct = float(CONFIG.get("RETRACE_MIN_PERCENT", 20.0)) / 100.0
 
     if direction == "SELL":
@@ -2347,7 +2273,6 @@ def check_reentry_after_tp3(direction, current_price):
         if current_price > retrace_price:
             return False, f"TP3 hit — retrace {current_price:.2f} > min {retrace_price:.2f}"
 
-    # Cek CHoCH M15
     choch_m15 = get_choch_m15()
     want = "BEAR_CHoCH" if direction == "SELL" else "BULL_CHoCH"
     if choch_m15 != want:
@@ -2357,7 +2282,7 @@ def check_reentry_after_tp3(direction, current_price):
 
 
 # ============================================================
-# SECTION: ANTI RE-ENTRY (poin-based)
+# SECTION: ANTI RE-ENTRY
 # ============================================================
 def get_positions_by_model(model_name, direction):
     """Return posisi aktif untuk model & arah tertentu."""
@@ -2401,7 +2326,7 @@ def can_reentry(model_name, direction, entry_price, atr_now):
     if not same_model:
         return True, "ok (no same-direction)"
 
-    # Aturan 3: Retrace after TP3
+    # Aturan 3: Retrace setelah TP3
     tp3_hit_exists = any(
         PARTIAL_STATE.get(p.ticket, {}).get("tp3_done")
         for p in same_model
@@ -2411,7 +2336,7 @@ def can_reentry(model_name, direction, entry_price, atr_now):
         if not ok:
             return False, reason
 
-    # Aturan 4: Jarak minimum (poin)
+    # Aturan 4: Jarak minimum
     min_dist = atr_now * float(CONFIG.get("MIN_REENTRY_ATR", 2.0))
     avg_trigger_poin = atr_now * float(CONFIG.get("LOSS_REENTRY_ATR", 1.5))
 
@@ -2439,9 +2364,9 @@ def can_reentry(model_name, direction, entry_price, atr_now):
 
 # ============================================================
 # SECTION: OPEN TRADE
-# Eksekusi order
 # ============================================================
 def open_trade(model_result, risk_data, symbol_info=None):
+    """Eksekusi order."""
     try:
         symbol_info = symbol_info or mt5.symbol_info(SYMBOL)
         if symbol_info is None:
@@ -2462,7 +2387,6 @@ def open_trade(model_result, risk_data, symbol_info=None):
             return False
         preview_entry = tick.ask if direction == "BUY" else tick.bid
 
-        # Cek re-entry
         can_open, reason = can_reentry(model_name, direction, preview_entry, atr_now)
         if not can_open:
             runtime_message(f"Skip entry — {reason}")
@@ -2478,7 +2402,6 @@ def open_trade(model_result, risk_data, symbol_info=None):
         digits = symbol_info.digits
         entry = tick.ask if direction == "BUY" else tick.bid
 
-        # Recalculate SL/TP dengan entry aktual
         sl, sl_source = resolve_sl(
             entry, direction, atr_now,
             swing_low=model_result.get("swing_low"),
@@ -2504,7 +2427,6 @@ def open_trade(model_result, risk_data, symbol_info=None):
         sl = round(sl, digits)
         tp3 = round(tp_plan["tp3"], digits)
 
-        # Validasi arah SL/TP
         if direction == "BUY":
             if sl >= entry or tp3 <= entry:
                 runtime_message(f"BAD SL/TP BUY")
@@ -2630,8 +2552,7 @@ def compute_stats(trades):
         p = t["profit"]
         stats["profit_total"] += p
         if p > 0.01:
-            stats["wins"] += 1
-            stats["profit_wins"] += p
+            stats["wins"] += 1            stats["profit_wins"] += p
         elif p < -0.01:
             stats["losses"] += 1
             stats["profit_losses"] += abs(p)
@@ -2680,7 +2601,6 @@ def refresh_stats(force=False):
 
 # ============================================================
 # SECTION: UI HELPERS
-# Panel-panel dashboard
 # ============================================================
 def rich_status(value, on_color="green", off_color="red"):
     return Text("ON", style=on_color) if value else Text("OFF", style=off_color)
@@ -2741,7 +2661,7 @@ def render_stats_panel():
 
 
 def render_diagnostic_panel():
-    """Panel DIAGNOSTIC — kenapa model gagal."""
+    """Panel DIAGNOSTIC."""
     tbl = Table.grid(expand=True, padding=(0, 1))
     tbl.add_column(style="cyan", no_wrap=True)
     tbl.add_column(ratio=1)
@@ -2769,7 +2689,7 @@ def render_diagnostic_panel():
 
 
 def render_model_scores_panel():
-    """Panel MODEL SCORES — skor per model."""
+    """Panel MODEL SCORES."""
     tbl = Table.grid(expand=True, padding=(0, 1))
     tbl.add_column(style="cyan", no_wrap=True)
     tbl.add_column(ratio=1, justify="center")
@@ -2870,7 +2790,7 @@ def render_rich_dashboard(*, account, positions, bid, ask, price_direction,
                           trend, htf_trend, atr_val, atr_ok,
                           best_model, fakeout, daily_pnl, daily_loss_percent,
                           trading_disabled_today):
-    """Render seluruh dashboard."""
+    """Render dashboard."""
     global best_model_global
     best_model_global = best_model or {}
 
@@ -2883,7 +2803,7 @@ def render_rich_dashboard(*, account, positions, bid, ask, price_direction,
     header.add_column(ratio=1)
     header.add_column(justify="center", ratio=1)
     header.add_column(justify="right", ratio=1)
-    title = Text("WEENfx PRO - v6.3.1", style="bold cyan")
+    title = Text("WEENfx PRO - v6.3.2", style="bold cyan")
     symbol = Text(SYMBOL, style="bold white")
     right = Text()
     right.append(now, style="white")
@@ -3059,6 +2979,9 @@ def render_rich_dashboard(*, account, positions, bid, ask, price_direction,
     risk.add_row("TP RR", Text(f"1:{CONFIG.get('TP_RR_TP1',1.0)}/1:{CONFIG.get('TP_RR_TP2',2.0)}/1:{CONFIG.get('TP_RR_TP3',3.0)}"))
     risk.add_row("BE", Text(f"ATR×{CONFIG.get('BE_TRIGGER_ATR',1.0)}", style="cyan"))
     risk.add_row("Trail", Text(f"ATR×{CONFIG.get('TRAIL_TRIGGER_ATR',2.0)} s{CONFIG.get('TRAIL_SECURE_PCT',50)}%"))
+    risk.add_row("Partial", Text(f"{CONFIG.get('PARTIAL_MODE', 'PERCENT')} "
+                                  f"{CONFIG.get('PARTIAL_PCT_1', 33)}/{CONFIG.get('PARTIAL_PCT_2', 33)}",
+                                  style="magenta"))
     risk.add_row("Daily", Text(f"${daily_pnl:.2f} / {daily_loss_percent:.2f}%"))
     risk.add_row("Manual Rec", Text("ON" if CONFIG.get("USE_MANUAL_RECOVERY", True) else "OFF",
                                     style="green" if CONFIG.get("USE_MANUAL_RECOVERY", True) else "dim"))
@@ -3173,7 +3096,7 @@ MODEL_SCORES = {
 # SECTION: STARTUP
 # ============================================================
 print("=" * 60)
-print("Starting v6.3.1 ...")
+print("Starting v6.3.2 ...")
 print(f"   Symbol: {SYMBOL}")
 print(f"   Entry TF: {TIMEFRAME_ENTRY}")
 print(f"   Auto Trade: {'ON' if CONFIG.get('USE_AUTO_TRADE', True) else 'OFF'}")
@@ -3189,8 +3112,9 @@ print(f"   TP RR: 1:{CONFIG.get('TP_RR_TP1',1.0)} / 1:{CONFIG.get('TP_RR_TP2',2.
 print(f"   BE: ATR x {CONFIG.get('BE_TRIGGER_ATR',1.0)}")
 print(f"   Trailing: ATR x {CONFIG.get('TRAIL_TRIGGER_ATR',2.0)} sec {CONFIG.get('TRAIL_SECURE_PCT',50)}%")
 print(f"   Min Confluence: {int(CONFIG.get('MIN_CONFLUENCE',70))}%")
-print(f"   Partial: {CONFIG.get('PARTIAL_MODE', 'LOT')} "
-      f"(min lot {CONFIG.get('PARTIAL_MIN_LOT', 0.03)})")
+print(f"   Partial: {CONFIG.get('PARTIAL_MODE', 'PERCENT')} "
+      f"({CONFIG.get('PARTIAL_PCT_1', 33)}/{CONFIG.get('PARTIAL_PCT_2', 33)}), "
+      f"min lot {CONFIG.get('PARTIAL_MIN_LOT', 0.03)}")
 print(f"   Manual Recovery: {'ON' if CONFIG.get('USE_MANUAL_RECOVERY', True) else 'OFF'}")
 print(f"   Retrace After TP3: {CONFIG.get('RETRACE_MIN_PERCENT', 20.0)}% + CHoCH M15")
 print("=" * 60)
@@ -3201,7 +3125,6 @@ console.clear()
 
 # ============================================================
 # SECTION: MAIN LOOP
-# Loop utama — analisis, entry, manage, render
 # ============================================================
 last_candle_time = get_last_closed_candle_time(TIMEFRAME_ENTRY)
 active_model = "-"
@@ -3229,7 +3152,7 @@ with Live(console=console, refresh_per_second=4, screen=True, transient=False,
         except Exception as e:
             runtime_message(f"Rebuild meta: {e}")
 
-        # 2. Rebuild PARTIAL_STATE
+        # 2. Rebuild PARTIAL_STATE (butuh POSITION_META)
         try:
             rebuild_partial_plans()
         except Exception as e:
@@ -3249,14 +3172,12 @@ with Live(console=console, refresh_per_second=4, screen=True, transient=False,
         try:
             current_time = time.time()
 
-            # Reconnect MT5 kalau disconnect
             if not mt5.account_info():
                 runtime_message("Reconnecting MT5...")
                 mt5.initialize()
                 time.sleep(3)
                 continue
 
-            # Ambil data entry M5
             df = get_closed_data(TIMEFRAME_ENTRY)
             if df is None or df.empty:
                 runtime_message("Waiting data...")
@@ -3308,7 +3229,6 @@ with Live(console=console, refresh_per_second=4, screen=True, transient=False,
 
             daily_pnl, daily_loss_percent = check_daily_loss()
 
-            # Update DIAG_STATE
             DIAG_STATE["swing_buy"] = find_last_swing_for_fib(df, "BUY")[0] is not None
             DIAG_STATE["swing_sell"] = find_last_swing_for_fib(df, "SELL")[0] is not None
             DIAG_STATE["demand_zones"] = len(demand_zones)
@@ -3452,5 +3372,5 @@ with Live(console=console, refresh_per_second=4, screen=True, transient=False,
 
 
 # ============================================================
-# END OF FILE — v6.3.1
+# END OF FILE — v6.3.2
 # ============================================================
