@@ -1,0 +1,6 @@
+state.json
+error.log
+config.json.broken
+__pycache__/
+*.pyc
+.vscode/
