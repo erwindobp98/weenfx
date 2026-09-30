@@ -1,5 +1,5 @@
 # ============================================================
-# Wfx PRO — SMC + FIBONACCI — v6.3.2
+# Wfx PRO — SMC + FIBONACCI — v6.2
 # ------------------------------------------------------------
 # EA untuk MetaTrader 5 (XAUUSD).
 # Strategi: Smart Money Concepts (SMC) + Fibonacci.
@@ -39,9 +39,9 @@ from rich.live import Live            # Update dashboard tanpa flicker
 # Path file config, state, log
 # ============================================================
 BASE_DIR = Path(__file__).resolve().parent   # Folder script ini
-CONFIG_FILE = BASE_DIR / "config.json"        # Path config user
-STATE_FILE = BASE_DIR / "state.json"          # Path state runtime
-ERROR_LOG = BASE_DIR / "error.log"            # Path log error
+CONFIG_FILE = BASE_DIR / "config_v6.2.json"        # Path config user
+STATE_FILE = BASE_DIR / "state_v6.2.json"          # Path state runtime
+ERROR_LOG = BASE_DIR / "error_v6.2.log"            # Path log error
 
 
 # ============================================================
@@ -59,7 +59,7 @@ DEFAULT_CONFIG = {
     # ----- RISK MANAGEMENT -----
     "RISK_PER_TRADE_PCT": 1.0,    # Risiko per trade (% balance) — belum dipakai
     "MAX_DAILY_LOSS_PCT": 20.0,   # Stop entry kalau daily loss ≥ 20%
-    "MAX_OPEN_POSITIONS": 6,      # Max posisi global
+    "MAX_OPEN_POSITIONS": 3,      # Max posisi global
     "MAX_PER_MODEL": 2,           # Fallback max per model
 
     # ----- MODEL TOGGLES -----
@@ -95,7 +95,7 @@ DEFAULT_CONFIG = {
     "PARTIAL_MIN_LOT": 0.03,      # Lot minimal untuk aktifkan partial
 
     # ----- ENTRY FILTERS -----
-    "MIN_CONFLUENCE": 70,         # Skor minimum entry
+    "MIN_CONFLUENCE": 80,         # Skor minimum entry
     "USE_FIB_GATE": False,        # Fib sebagai gate/flag
     "USE_SESSION_FILTER": True,   # Filter session
     "SESSION_TIMEZONE": "Asia/Jakarta",
@@ -132,12 +132,12 @@ DEFAULT_CONFIG = {
 
     # ----- LOT SIZING -----
     "LOT_SIZE": 0.01,             # Fallback lot
-    "LOT_TIER_1": 0.01,           # Confluence 70-79% → 0.01
-    "LOT_TIER_2": 0.03,           # Confluence 80-89% → 0.03
-    "LOT_TIER_3": 0.06,           # Confluence 90-100% → 0.06
+    "LOT_TIER_1": 0.03,           # Confluence 70-79% → 0.01
+    "LOT_TIER_2": 0.06,           # Confluence 80-89% → 0.03
+    "LOT_TIER_3": 0.09,           # Confluence 90-100% → 0.06
     "MIN_LOT_SIZE": 0.01,
-    "MAX_LOT_SIZE": 0.06,
-    "HARD_LOT_CAP": 0.06,
+    "MAX_LOT_SIZE": 0.09,
+    "HARD_LOT_CAP": 0.09,
 
     # ----- SESSION FILTER -----
     "SESSION_FILTER": {
@@ -1123,41 +1123,34 @@ class ContinuationModel(BaseModel):
     HTF_REQUIRED = True
 
     def evaluate(self):
-        """CONTINUATION: 1 dari 4 konfirmasi (LTF atau HTF)."""
         if not self.gate_htf():
             return self.result
-
         htf = self.ctx.get("htf_trend", "SIDEWAYS")
         direction = "BUY" if htf == "BULLISH" else "SELL"
         self.result["direction"] = direction
 
+        ltf_trend = self.ctx.get("trend_ltf", "SIDEWAYS")
+        if ltf_trend != "SIDEWAYS":
+            want_ltf = "BULLISH" if direction == "BUY" else "BEARISH"
+            if ltf_trend != want_ltf:
+                self._diag(f"LTF conflict ({ltf_trend} vs {want_ltf})")
+                return self.result
+
         if not self.gate_zone(direction):
             return self.result
 
-        df_ltf = self.ctx["df_ltf"]
-        df_htf = self.ctx.get("df_htf", df_ltf)
-        ltf_choch = self.ctx.get("choch_ltf")
-        ltf_rej = self.ctx.get("wick_ltf")
-        htf_choch = detect_choch(df_htf, SWING_STRICTNESS)
-        htf_rej = detect_rejection_wick(df_htf)
+        has_sweep = False
+        if direction == "BUY":
+            has_sweep = self.ctx.get("sweep_buy", False)
+        else:
+            has_sweep = self.ctx.get("sweep_sell", False)
 
-        confirmed = (
-            (direction == "BUY" and (
-                ltf_choch == "BULL_CHoCH" or ltf_rej == "BULL" or
-                htf_choch == "BULL_CHoCH" or htf_rej == "BULL"
-            )) or
-            (direction == "SELL" and (
-                ltf_choch == "BEAR_CHoCH" or ltf_rej == "BEAR" or
-                htf_choch == "BEAR_CHoCH" or htf_rej == "BEAR"
-            ))
-        )
-        if not confirmed:
-            self._diag(f"no-Confirm(choch={ltf_choch},wick={ltf_rej})")
+        if not self.gate_confirmation(direction, has_sweep):
             return self.result
 
-        self.result["choch"] = ltf_choch
-        self.result["wick"] = ltf_rej
-        self.result["sweep"] = False
+        self.result["choch"] = self.ctx.get("choch_ltf")
+        self.result["wick"] = self.ctx.get("wick_ltf")
+        self.result["sweep"] = has_sweep
 
         if not self.gate_swing(direction):
             return self.result
@@ -1179,7 +1172,6 @@ class ReversalModel(BaseModel):
     HTF_REQUIRED = False
 
     def evaluate(self):
-        """REVERSAL: 4 jalur masuk."""
         mss = self.ctx.get("choch_ltf")
         rej = self.ctx.get("wick_ltf")
         sweep_buy = self.ctx.get("sweep_buy", False)
@@ -1205,35 +1197,22 @@ class ReversalModel(BaseModel):
 
         self.result["direction"] = direction
 
+        # v6.2: wajib HTF SIDEWAYS
+        htf = self.ctx.get("htf_trend", "SIDEWAYS")
+        if htf != "SIDEWAYS":
+            self._diag(f"REVERSAL blocked: HTF={htf}")
+            return self.result
+
         has_sweep = False
         if direction == "BUY" and sweep_buy:
             has_sweep = True
         elif direction == "SELL" and sweep_sell:
             has_sweep = True
 
-        choch_ok = (
-            (direction == "BUY" and mss == "BULL_CHoCH") or
-            (direction == "SELL" and mss == "BEAR_CHoCH")
-        )
-        wick_ok = (
-            (direction == "BUY" and rej == "BULL") or
-            (direction == "SELL" and rej == "BEAR")
-        )
-
-        # 4 jalur masuk
-        if has_sweep and (choch_ok or wick_ok):
-            pass
-        elif choch_ok and wick_ok:
-            pass
-        elif choch_ok and not has_sweep and not wick_ok:
-            self._diag(f"choch-only({mss})")
-        elif wick_ok and not has_sweep and not choch_ok:
-            self._diag(f"wick-only({rej})")
-        else:
-            self._diag(f"no-confirm(sweep={has_sweep},choch={mss},wick={rej})")
+        if not self.gate_zone(direction):
             return self.result
 
-        if not self.gate_zone(direction):
+        if not self.gate_confirmation(direction, has_sweep):
             return self.result
 
         self.result["choch"] = mss
@@ -1260,7 +1239,6 @@ class SweepModel(BaseModel):
     HTF_REQUIRED = False
 
     def evaluate(self):
-        """SWEEP: hanya sweep + wick."""
         sweep_buy = self.ctx.get("sweep_buy", False)
         sweep_sell = self.ctx.get("sweep_sell", False)
 
@@ -1276,18 +1254,35 @@ class SweepModel(BaseModel):
 
         self.result["direction"] = direction
 
-        wick = self.ctx.get("wick_ltf")
-        if direction == "BUY" and wick != "BULL":
-            self._diag(f"no-Wick({wick})")
+        # v6.2: wajib wick + CHoCH
+        choch_ok = (
+            (direction == "BUY" and self.ctx.get("choch_ltf") == "BULL_CHoCH") or
+            (direction == "SELL" and self.ctx.get("choch_ltf") == "BEAR_CHoCH")
+        )
+        wick_ok = (
+            (direction == "BUY" and self.ctx.get("wick_ltf") == "BULL") or
+            (direction == "SELL" and self.ctx.get("wick_ltf") == "BEAR")
+        )
+
+        if not wick_ok:
+            self._diag(f"no-Wick({self.ctx.get('wick_ltf')})")
             return self.result
-        if direction == "SELL" and wick != "BEAR":
-            self._diag(f"no-Wick({wick})")
+        if not choch_ok:
+            self._diag(f"no-CHoCH({self.ctx.get('choch_ltf')})")
+            return self.result
+
+        # HTF conflict ringan
+        htf = self.ctx.get("htf_trend", "SIDEWAYS")
+        want_htf = "BULLISH" if direction == "BUY" else "BEARISH"
+        if htf in ("BULLISH", "BEARISH") and htf != want_htf:
+            self._diag(f"HTF conflict ({htf} vs {want_htf})")
             return self.result
 
         if not self.gate_zone(direction):
             return self.result
 
-        self.result["wick"] = wick
+        self.result["choch"] = self.ctx.get("choch_ltf")
+        self.result["wick"] = self.ctx.get("wick_ltf")
         self.result["sweep"] = True
 
         if not self.gate_swing(direction):
@@ -2552,7 +2547,7 @@ def compute_stats(trades):
         p = t["profit"]
         stats["profit_total"] += p
         if p > 0.01:
-            stats["wins"] += 1            
+            stats["wins"] += 1
             stats["profit_wins"] += p
         elif p < -0.01:
             stats["losses"] += 1
