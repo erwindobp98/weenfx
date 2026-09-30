@@ -1,5 +1,5 @@
 # ============================================================
-# Wfx PRO — SMC + FIBONACCI — v6.2
+# Wfx PRO — SMC + FIBONACCI — v6.3.2
 # ------------------------------------------------------------
 # EA untuk MetaTrader 5 (XAUUSD).
 # Strategi: Smart Money Concepts (SMC) + Fibonacci.
