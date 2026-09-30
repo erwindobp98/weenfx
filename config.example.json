@@ -1,0 +1,105 @@
+{
+    "SYMBOL": "XAUUSD.vxc",
+    "TIMEFRAME_ENTRY": "M5",
+    "TIMEFRAME_SMC": "M15",
+    "TIMEFRAME_HTF": "H1",
+
+    "RISK_PER_TRADE_PCT": 1.0,
+    "MAX_DAILY_LOSS_PCT": 20.0,
+    "MAX_OPEN_POSITIONS": 6,
+    "MAX_PER_MODEL": 2,
+
+    "USE_MODEL_CONTINUATION": true,
+    "USE_MODEL_REVERSAL": true,
+    "USE_MODEL_SWEEP": true,
+
+    "MAX_POSITIONS_CONTINUATION": 2,
+    "MAX_POSITIONS_REVERSAL": 2,
+    "MAX_POSITIONS_SWEEP": 2,
+
+    "SL_ATR_MULT": 1.5,
+    "TP_RR_TP1": 1.0,
+    "TP_RR_TP2": 2.0,
+    "TP_RR_TP3": 3.0,
+    "MIN_RR_TP3": 1.2,
+    "MAX_RR_TP3": 8.0,
+    "HARD_MAX_RR_TP3": 12.0,
+
+    "BE_TRIGGER_ATR": 1.0,
+    "TRAIL_TRIGGER_ATR": 2.0,
+    "TRAIL_SECURE_PCT": 50,
+
+    "PARTIAL_MODE": "LOT",
+    "PARTIAL_PCT_1": 50,
+    "PARTIAL_PCT_2": 50,
+    "PARTIAL_LOT_1": 0.01,
+    "PARTIAL_LOT_2": 0.01,
+    "PARTIAL_MIN_LOT": 0.03,
+
+    "MIN_CONFLUENCE": 70,
+    "USE_FIB_GATE": false,
+    "USE_SESSION_FILTER": true,
+    "SESSION_TIMEZONE": "Asia/Jakarta",
+    "USE_ATR_FILTER": true,
+    "MIN_ATR_VALUE": 0.8,
+    "USE_CLOSED_CANDLE_LOCK": true,
+
+    "SMC_ZONE_SENSITIVITY": 0.10,
+    "SMC_MAX_ZONES": 20,
+    "SWEEP_LOOKBACK": 20,
+    "SWING_STRICTNESS": 1,
+    "ZONE_TOLERANCE_ATR": 0.20,
+    "MIN_SWING_SIZE": 1.5,
+    "SWING_FIB_LOOKBACK": 80,
+
+    "USE_CHOCH": true,
+    "USE_REJECTION_WICK": true,
+    "USE_SMART_SWEEP": true,
+    "USE_ORDER_BLOCK": true,
+    "USE_FVG": true,
+    "USE_CONFLUENCE_CHECK": true,
+
+    "FIB_ENTRY_ZONE_CONTINUATION": [0.236, 0.886],
+    "FIB_ENTRY_ZONE_REVERSAL": [0.5, 0.886],
+    "FIB_ENTRY_ZONE_SWEEP": [0.382, 0.886],
+
+    "MIN_REENTRY_ATR": 1.5,
+    "LOSS_REENTRY_ATR": 1.5,
+    "RETRACE_MIN_PERCENT": 20.0,
+
+    "LOT_SIZE": 0.01,
+    "LOT_TIER_1": 0.01,
+    "LOT_TIER_2": 0.03,
+    "LOT_TIER_3": 0.06,
+    "MIN_LOT_SIZE": 0.01,
+    "MAX_LOT_SIZE": 0.06,
+    "HARD_LOT_CAP": 0.06,
+
+    "SESSION_FILTER": {
+        "ENABLED": true,
+        "ASIA": {"ENABLED": true, "START": "07:00", "END": "15:00"},
+        "LONDON": {"ENABLED": true, "START": "15:00", "END": "23:00"},
+        "NEW_YORK": {"ENABLED": true, "START": "20:00", "END": "04:00"},
+        "LONDON_NEW_YORK_OVERLAP": {"ENABLED": true, "START": "20:00", "END": "23:00"}
+    },
+
+    "MAGIC": 777777,
+    "USE_AUTO_TRADE": true,
+    "STATS_LOOKBACK_DAYS": 30,
+    "SHOW_DIAGNOSTIC_PANEL": true,
+
+    "USE_MANUAL_RECOVERY": true,
+    "MANUAL_PROFILE": {
+        "SL_TP_MODE": "HYBRID",
+        "RR": 1.5,
+        "FIB_TP_EXT": 1.618,
+        "MIN_SL_PRICE": 3.0,
+        "MAX_SL_PRICE": 20.0,
+        "CHECK_INTERVAL": 30,
+        "OVERRIDE_EXISTING": false
+    },
+
+    "USE_FIB_SL": true,
+    "SL_BUFFER": 1.0,
+    "MIN_SL_DISTANCE": 4.0
+}
