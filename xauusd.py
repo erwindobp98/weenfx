@@ -2552,7 +2552,8 @@ def compute_stats(trades):
         p = t["profit"]
         stats["profit_total"] += p
         if p > 0.01:
-            stats["wins"] += 1            stats["profit_wins"] += p
+            stats["wins"] += 1            
+            stats["profit_wins"] += p
         elif p < -0.01:
             stats["losses"] += 1
             stats["profit_losses"] += abs(p)
