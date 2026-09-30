@@ -1,4 +1,8 @@
-# xauusd only windows
+# xauusd only windows (Min Aset $500)
+
+<img width="614" height="712" alt="image" src="https://github.com/user-attachments/assets/4eb8baf2-47fa-439e-b18e-100b572cb053" />
+
+
 # Wfx PRO — SMC + Fibonacci EA v6.3.1
 
 Expert Advisor untuk MetaTrader 5 (XAUUSD) dengan strategi **Smart Money Concepts (SMC)** + **Fibonacci**. Menggunakan 3 model entry:
