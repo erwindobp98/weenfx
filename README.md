@@ -35,8 +35,8 @@ Expert Advisor untuk MetaTrader 5 (XAUUSD) dengan strategi **Smart Money Concept
 
 1. Clone repo:
    ```bash
-   git clone https://github.com/erwindobp98/xauusd.git
-   cd xauusd
+   git clone https://github.com/erwindobp98/weenfx.git
+   cd weenfx
    ```
 
 2. Install dependencies:
