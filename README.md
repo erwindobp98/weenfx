@@ -20,7 +20,7 @@ Expert Advisor untuk MetaTrader 5 (XAUUSD) dengan strategi **Smart Money Concept
 - ✅ Dashboard rich (live, multi-panel)
 - ✅ Stats 30 hari (winrate, PF, per model)
 
-<img width="614" height="712" alt="image" src="https://github.com/user-attachments/assets/8f1dd7e9-e780-4440-ab87-c2986a524b88" />
+<img width="618" height="800" alt="image" src="https://github.com/user-attachments/assets/4174804c-05ca-4a30-a5c4-15171935d8ce" />
 
 ## Requirements
 
@@ -155,35 +155,6 @@ Lihat `config.example.json` untuk semua key.
 - ⚠️ **Spread XAUUSD** bisa melebar saat news — sesuaikan `MAX_SPREAD_POINTS` kalau perlu.
 - ⚠️ **Tidak ada jaminan profit** — trading berisiko.
 
-## Changelog
-
-### v6.3.1
-- Fix: rebuild POSITION_META untuk posisi lama saat restart
-- Fix: rebuild partial plans jangan skip kalau model kosong
-- Fix: startup urutan (meta → partial → manual recovery)
-
-### v6.3
-- Gabungkan arsitektur v6.2 + model entry v5.4
-- Model entry: CONTINUATION (1/4), REVERSAL (4 jalur), SWEEP (sweep+wick)
-- TP RR-based (bukan Fib extension)
-
-### v6.2
-- Class-based model
-- 5 gate seragam
-- Confluence score
-- Fix gate_confirmation
-- MAX_POSITIONS per model
-
-## Lisensi
-
-MIT — bebas dipakai, modifikasi, distribusi.
-
-## Kontribusi
-
-Pull request welcome. Untuk bug report, buat issue dengan:
-- Log error (dari `error.log`)
-- Screenshot dashboard
-- Versi Python & MT5
 
 ## Disclaimer
 
