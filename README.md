@@ -1,6 +1,6 @@
 # XAUUSD Only Windows (Min Aset $500)
 
-# Wfx PRO — SMC + Fibonacci EA v6.3.1
+# Wfx PRO — SMC + Fibonacci EA v6.3.3
 
 Expert Advisor untuk MetaTrader 5 (XAUUSD) dengan strategi **Smart Money Concepts (SMC)** + **Fibonacci**. Menggunakan 3 model entry:
 - **CONTINUATION** — follow trend
@@ -51,8 +51,13 @@ Expert Advisor untuk MetaTrader 5 (XAUUSD) dengan strategi **Smart Money Concept
 
 4. Edit `config.json`:
    - `SYMBOL` → sesuaikan broker (contoh: `XAUUSD.vxc`, `XAUUSD`, `GOLD`)
-   - `MAX_LOT_SIZE` → sesuaikan balance
-   - `MIN_CONFLUENCE` → 70 (default)
+    "LOT_SIZE": 0.01,
+    "LOT_TIER_1": 0.01,
+    "LOT_TIER_2": 0.03,
+    "LOT_TIER_3": 0.06,
+    "MIN_LOT_SIZE": 0.01,
+    "MAX_LOT_SIZE": 0.06,
+    "HARD_LOT_CAP": 0.06,
 
 5. Jalankan:
    ```bash
