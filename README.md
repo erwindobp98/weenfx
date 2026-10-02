@@ -1,6 +1,6 @@
 # XAUUSD Only Windows (Min Aset $500)
 
-# Wfx PRO — SMC + Fibonacci EA v6.3.3
+# Wfx PRO — SMC + Fibonacci EA v6.3.4
 
 Expert Advisor untuk MetaTrader 5 (XAUUSD) dengan strategi **Smart Money Concepts (SMC)** + **Fibonacci**. Menggunakan 3 model entry:
 - **CONTINUATION** — follow trend
