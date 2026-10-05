@@ -1,5 +1,7 @@
 # ============================================================
-# Wfx PRO — SMC + FIBONACCI — v6.3.4
+# Wfx PRO — SMC + FIBONACCI — v6.3.4.3
+# 2 Model: CONTINUATION + REVERSAL
+# Manual/Recovery seimbang dengan Model
 # ============================================================
 
 
@@ -31,9 +33,9 @@ from rich.live import Live
 # SECTION: CONFIG BOOTSTRAP
 # ============================================================
 BASE_DIR = Path(__file__).resolve().parent
-CONFIG_FILE = BASE_DIR / "config_v6.3.4.json"
-STATE_FILE = BASE_DIR / "state_v6.3.4.json"
-ERROR_LOG = BASE_DIR / "error_v6.3.4.log"
+CONFIG_FILE = BASE_DIR / "config_v6.3.4.3.json"
+STATE_FILE = BASE_DIR / "state_v6.3.4.3.json"
+ERROR_LOG = BASE_DIR / "error_v6.3.4.3.log"
 
 
 # ============================================================
@@ -41,139 +43,143 @@ ERROR_LOG = BASE_DIR / "error_v6.3.4.log"
 # ============================================================
 DEFAULT_CONFIG = {
     # ----- SYMBOL & TIMEFRAMES -----
-    "SYMBOL": "XAUUSD.vxc",
-    "TIMEFRAME_ENTRY": "M5",
-    "TIMEFRAME_SMC": "M15",
-    "TIMEFRAME_TREND": "M15",
-    "TIMEFRAME_HTF": "H1",
-    "FVG_TIMEFRAME": "M5",
+    "SYMBOL": "XAUUSD.vxc",               # [DIPAKAI] Symbol trading
+    "TIMEFRAME_ENTRY": "M5",              # [DIPAKAI] TF entry + trigger analisis
+    "TIMEFRAME_SMC": "M15",               # [DIPAKAI] TF deteksi zona SMC
+    "TIMEFRAME_TREND": "M15",             # [DIPAKAI] TF untuk trend EMA20/50 (dashboard)
+    "TIMEFRAME_HTF": "H1",                # [DIPAKAI] TF HTF trend + CHoCH/Wick H1
+    "FVG_TIMEFRAME": "M5",                # [DIPAKAI] TF deteksi FVG
 
     # ----- RISK MANAGEMENT -----
-    "MAX_DAILY_LOSS_PCT": 20.0,
-    "MAX_OPEN_POSITIONS": 3,
-    "MAX_PER_MODEL": 2,
+    "MAX_DAILY_LOSS_PCT": 20.0,           # [DIPAKAI] Stop trading jika daily loss ≥ X%
+    "MAX_OPEN_POSITIONS": 3,              # [DIPAKAI] Max posisi global
+    "MAX_PER_MODEL": 2,                   # [DIPAKAI] Max posisi per model (fallback)
 
     # ----- MODEL TOGGLES -----
-    "USE_MODEL_CONTINUATION": True,
-    "USE_MODEL_REVERSAL": True,
-    "USE_MODEL_SWEEP": True,
+    "USE_MODEL_CONTINUATION": True,       # [DIPAKAI] Aktifkan CONTINUATION
+    "USE_MODEL_REVERSAL": True,           # [DIPAKAI] Aktifkan REVERSAL
 
     # ----- MAX POSISI PER MODEL -----
-    "MAX_POSITIONS_CONTINUATION": 2,
-    "MAX_POSITIONS_REVERSAL": 2,
-    "MAX_POSITIONS_SWEEP": 2,
+    "MAX_POSITIONS_CONTINUATION": 2,      # [DIPAKAI] Max CONTINUATION searah
+    "MAX_POSITIONS_REVERSAL": 2,          # [DIPAKAI] Max REVERSAL searah
 
     # ----- SL / TP -----
-    "SL_ATR_MULT": 1.5,
-    "TP_RR_TP1": 1.0,
-    "TP_RR_TP2": 2.0,
-    "TP_RR_TP3": 3.0,
-    "MIN_RR_TP3": 1.0,
-    "HARD_MAX_RR_TP3": 8.0,
-    "MIN_SL_DISTANCE": 4.0,
-    "MAX_SL_POINTS": 15.0,
+    "SL_ATR_MULT": 1.5,                   # [DIPAKAI] SL = ATR × mult
+    "TP_RR_TP1": 1.0,                     # [DIPAKAI] TP1 = risk × 1.0
+    "TP_RR_TP2": 2.0,                     # [DIPAKAI] TP2 = risk × 2.0
+    "TP_RR_TP3": 3.0,                     # [DIPAKAI] TP3 = risk × 3.0
+    "MIN_RR_TP3": 1.0,                    # [DIPAKAI] RR minimum
+    "HARD_MAX_RR_TP3": 8.0,               # [DIPAKAI] RR hard cap
+    "MIN_SL_DISTANCE": 4.0,               # [DIPAKAI] SL minimal (poin)
+    "MAX_SL_POINTS": 15.0,                # [DIPAKAI] SL maksimal (poin)
 
     # ----- TRADE MANAGEMENT -----
-    "USE_BREAK_EVEN": True,
-    "USE_TRAILING": True,
-    "BE_TRIGGER_ATR": 1.5,
-    "BE_OFFSET_PRICE": 0.10,
-    "TRAIL_TRIGGER_ATR": 2.0,
-    "TRAIL_SECURE_PCT": 50,
+    "USE_BREAK_EVEN": True,               # [DIPAKAI] Aktifkan BE
+    "USE_TRAILING": True,                 # [DIPAKAI] Aktifkan Trailing
+    "BE_TRIGGER_ATR": 1.0,                # [DIPAKAI] BE aktif di profit ≥ 1× ATR
+    "BE_OFFSET_PRICE": 0.30,              # [DIPAKAI] Offset BE (poin)
+    "TRAIL_TRIGGER_ATR": 2.0,             # [DIPAKAI] Trailing aktif di profit ≥ 2× ATR
+    "TRAIL_SECURE_PCT": 50,               # [DIPAKAI] Lock profit % saat trailing
 
     # ----- PARTIAL CLOSE -----
-    "PARTIAL_MODE": "PERCENT",
-    "PARTIAL_PCT_1": 33,
-    "PARTIAL_PCT_2": 33,
-    "PARTIAL_LOT_1": 0.01,
-    "PARTIAL_LOT_2": 0.01,
-    "PARTIAL_MIN_LOT": 0.03,
+    "PARTIAL_MODE": "PERCENT",            # [DIPAKAI] "PERCENT" / "LOT"
+    "PARTIAL_PCT_1": 33,                  # [DIPAKAI] TP1 close 33%
+    "PARTIAL_PCT_2": 33,                  # [DIPAKAI] TP2 close 33%
+    "PARTIAL_LOT_1": 0.01,                # [DIPAKAI KALAU MODE=LOT]
+    "PARTIAL_LOT_2": 0.01,                # [DIPAKAI KALAU MODE=LOT]
+    "PARTIAL_MIN_LOT": 0.03,              # [DIPAKAI] Min lot untuk partial (model/manual)
 
     # ----- ENTRY FILTERS -----
-    "MIN_CONFLUENCE": 75,
-    "USE_FIB_GATE": False,
-    "USE_SESSION_FILTER": True,
-    "SESSION_TIMEZONE": "Asia/Jakarta",
-    "USE_ATR_FILTER": True,
-    "MIN_ATR_VALUE": 1.0,
-    "EMA_FAST": 20,
-    "EMA_MID": 50,
-    "EMA_SLOW": 100,
-    "WICK_RATIO_MIN": 0.45,
+    "USE_FIB_GATE": False,                # [DIPAKAI] Fib sebagai gate/flag
+    "USE_SESSION_FILTER": True,           # [DIPAKAI] Filter session
+    "SESSION_TIMEZONE": "Asia/Jakarta",   # [DIPAKAI] Timezone WIB
+    "USE_ATR_FILTER": True,               # [DIPAKAI] Filter ATR
+    "MIN_ATR_VALUE": 1.0,                 # [DIPAKAI] ATR minimal
+    "EMA_FAST": 20,                       # [DIPAKAI] EMA fast
+    "EMA_MID": 50,                        # [DIPAKAI] EMA mid
+    "EMA_SLOW": 100,                      # [DIPAKAI] EMA slow
+    "WICK_RATIO_MIN": 0.45,               # [DIPAKAI] Min wick ratio rejection
 
     # ----- SMC / ZONE -----
-    "SMC_ZONE_SENSITIVITY": 0.10,
-    "SMC_MAX_ZONES": 20,
-    "SWEEP_LOOKBACK": 50,
-    "SWEEP_MIN_DISPLACEMENT_ATR": 0.50,
-    "SWING_STRICTNESS": 1,
-    "ZONE_TOLERANCE_ATR": 1.0,
-    "MIN_SWING_SIZE": 1.0,
-    "SWING_FIB_LOOKBACK": 50,
-    "SMC_ATR_PERIOD": 50,
-    "ATR_PERIOD": 14,
-    "ZONE_OVERLAP_ATR": 1.0,
-    "ZONE_BODY_RATIO_MIN": 0.25,
+    "SMC_ZONE_SENSITIVITY": 0.10,         # [DIPAKAI] Sensitivitas deteksi zona
+    "SMC_MAX_ZONES": 20,                  # [DIPAKAI] Max zona per arah
+    "SWEEP_LOOKBACK": 50,                 # [DIPAKAI] Lookback sweep
+    "SWEEP_MIN_DISPLACEMENT_ATR": 0.50,   # [DIPAKAI] Min displacement sweep
+    "SWING_STRICTNESS": 1,                # [DIPAKAI] Strictness swing
+    "ZONE_TOLERANCE_ATR": 1.0,            # [DIPAKAI] Toleransi POI (× ATR)
+    "MIN_SWING_SIZE": 1.0,                # [DIPAKAI] Min swing size
+    "SWING_FIB_LOOKBACK": 50,             # [DIPAKAI] Lookback swing fib
+    "SMC_ATR_PERIOD": 50,                 # [DIPAKAI] ATR period untuk zona SMC
+    "ATR_PERIOD": 14,                     # [DIPAKAI] ATR period untuk SL/TP
+    "ZONE_OVERLAP_ATR": 1.0,              # [DIPAKAI] Overlap threshold zona
+    "ZONE_BODY_RATIO_MIN": 0.25,          # [DIPAKAI] Min body ratio candle (untuk filter lain)
+
+    # ----- FAKE BREAKOUT FILTER -----
+    "USE_FAKE_BREAKOUT_FILTER": True,     # [DIPAKAI] Aktifkan filter fake breakout
+    "FAKE_BREAKOUT_LOOKBACK": 10,         # [DIPAKAI] Lookback swing high/low
+    "FAKE_BREAKOUT_WICK_RATIO": 0.50,     # [DIPAKAI] Wick ≥ X × range
+    "FAKE_BREAKOUT_BODY_RATIO": 0.20,     # [DIPAKAI] Body < X × range
 
     # ----- FVG -----
-    "USE_FVG": True,
-    "USE_FVG_MITIGATION": True,
-    "FVG_MIN_GAP_ATR": 0.05,
-    "FVG_MIN_GAP_PRICE": 0.01,
+    "USE_FVG": True,                      # [DIPAKAI] Bonus confluence via FVG
+    "USE_FVG_MITIGATION": True,           # [DIPAKAI] Track FVG terisi
+    "FVG_MIN_GAP_ATR": 0.05,              # [DIPAKAI] Min gap FVG (× ATR)
+    "FVG_MIN_GAP_PRICE": 0.01,            # [DIPAKAI] Min gap FVG (harga)
 
     # ----- FIBONACCI ENTRY ZONES -----
-    "FIB_ZONE_CONTINUATION": [0.382, 0.786],
-    "FIB_ZONE_REVERSAL": [0.5, 0.886],
-    "FIB_ZONE_SWEEP": [0.382, 0.786],
+    "FIB_ZONE_CONTINUATION": [0.382, 0.786],  # [DIPAKAI] Zona fib CONTINUATION
+    "FIB_ZONE_REVERSAL": [0.5, 0.886],        # [DIPAKAI] Zona fib REVERSAL
 
     # ----- ANTI RE-ENTRY -----
-    "MIN_REENTRY_ATR": 2.0,
-    "LOSS_REENTRY_ATR": 2.0,
-    "RETRACE_MIN_PERCENT": 20.0,
+    "MIN_REENTRY_ATR": 2.0,               # [DIPAKAI] Min re-entry distance (× ATR)
+    "LOSS_REENTRY_ATR": 2.0,              # [DIPAKAI] Trigger averaging loss (× ATR)
+    "RETRACE_MIN_PERCENT": 20.0,          # [DIPAKAI] Min retrace setelah TP3
 
-    # ----- LOT SIZING -----
-    "LOT_SIZE": 0.01,
-    "LOT_TIER_1": 0.01,
-    "LOT_TIER_2": 0.03,
-    "LOT_TIER_3": 0.06,
-    "MIN_LOT_SIZE": 0.01,
-    "MAX_LOT_SIZE": 0.06,
-    "HARD_LOT_CAP": 0.06,
+    # ----- BONUS SIZING -----
+    "BONUS_SIZING_ENABLED": True,         # [DIPAKAI] Aktifkan sizing dari bonus
+    "BONUS_LOT_TIER_1": 0.03,             # [DIPAKAI] Lot tier 1
+    "BONUS_LOT_TIER_2": 0.06,             # [DIPAKAI] Lot tier 2
+    "BONUS_LOT_TIER_3": 0.09,             # [DIPAKAI] Lot tier 3
+    "BONUS_TIER_THRESHOLD_1": 3,          # [DIPAKAI] Threshold bonus tier 1
+    "BONUS_TIER_THRESHOLD_2": 8,          # [DIPAKAI] Threshold bonus tier 2
 
-    # ----- CONFLUENCE SCORES -----
-    "CONFLUENCE_HTF_SCORE": 20,
-    "CONFLUENCE_POI_SCORE": 20,
-    "CONFLUENCE_CHOCH_SCORE": 15,
-    "CONFLUENCE_WICK_SCORE": 10,
-    "CONFLUENCE_FIB_SCORE": 15,
-    "CONFLUENCE_SESSION_SCORE": 10,
-    "CONFLUENCE_FVG_SCORE": 5,
-    "CONFLUENCE_RR_SCORE": 10,
-    "CONFLUENCE_TIER_1": 75,
-    "CONFLUENCE_TIER_2": 80,
-    "CONFLUENCE_TIER_3": 90,
-    "CONFLUENCE_RR_THRESHOLD": 2.0,
+    # ----- BONUS POINT WEIGHTS -----
+    "BONUS_FIB_REVERSAL": 3,              # [DIPAKAI] Fib OTE (REVERSAL)
+    "BONUS_FIB_OTHER": 2,                 # [DIPAKAI] Fib OTE (CONTINUATION)
+    "BONUS_OB_FVG": 2,                    # [DIPAKAI] OB + FVG searah
+    "BONUS_SWEEP_WICK": 2,                # [DIPAKAI] Sweep + wick > X%
+    "BONUS_SWEEP_WICK_RATIO": 0.70,       # [DIPAKAI] Threshold wick
+    "BONUS_HTF": 3,                       # [DIPAKAI] HTF searah
+    "BONUS_RR": 2,                        # [DIPAKAI] RR ≥ threshold
+    "BONUS_RR_THRESHOLD": 3.0,            # [DIPAKAI] Threshold RR
+    "BONUS_DIVERGENCE": 1,                # [TIDAK DIPAKAI — placeholder]
+
+    # ----- LOT SIZING (FALLBACK) -----
+    "LOT_SIZE": 0.01,                     # [DIPAKAI KALAU BONUS_SIZING_ENABLED=FALSE]
+    "MIN_LOT_SIZE": 0.01,                 # [DIPAKAI] Lot minimum
+    "MAX_LOT_SIZE": 0.09,                 # [DIPAKAI] Lot maksimum
+    "HARD_LOT_CAP": 0.09,                 # [DIPAKAI] Hard cap lot
 
     # ----- GUARDS -----
-    "MARGIN_SAFETY_PCT": 30.0,
+    "MARGIN_SAFETY_PCT": 30.0,            # [DIPAKAI] Margin safety
 
     # ----- ORDER RETRY -----
-    "TRADE_DEVIATION": 20,
-    "ORDER_RETRY_COUNT": 3,
-    "ORDER_RETRY_DELAY": 0.50,
-    "POST_ORDER_SETTLE_DELAY": 0.50,
-    "RECONNECT_RETRIES": 5,
-    "RECONNECT_DELAY": 5,
+    "TRADE_DEVIATION": 20,                # [DIPAKAI] Slippage
+    "ORDER_RETRY_COUNT": 3,               # [DIPAKAI] Retry order
+    "ORDER_RETRY_DELAY": 0.50,            # [DIPAKAI] Delay retry
+    "POST_ORDER_SETTLE_DELAY": 0.50,      # [DIPAKAI] Delay setelah order
+    "RECONNECT_RETRIES": 5,               # [DIPAKAI] Retry koneksi
+    "RECONNECT_DELAY": 5,                 # [DIPAKAI] Delay koneksi
 
     # ----- MAIN LOOP TIMING -----
-    "MAIN_LOOP_INTERVAL": 1.0,
-    "SMC_UPDATE_INTERVAL": 60,
-    "META_REBUILD_INTERVAL": 15,
-    "STATS_REFRESH_INTERVAL": 10,
-    "STARTUP_DELAY": 2,
+    "MAIN_LOOP_INTERVAL": 1.0,            # [DIPAKAI] Interval main loop
+    "SMC_UPDATE_INTERVAL": 60,            # [DIPAKAI] Refresh zona SMC
+    "META_REBUILD_INTERVAL": 15,          # [DIPAKAI] Rebuild meta
+    "STATS_REFRESH_INTERVAL": 10,         # [DIPAKAI] Refresh stats
+    "STARTUP_DELAY": 2,                   # [DIPAKAI] Delay startup
 
     # ----- SESSION FILTER -----
-    "SESSION_FILTER": {
+    "SESSION_FILTER": {                   # [DIPAKAI] Config session
         "ENABLED": True,
         "ASIA": {"ENABLED": True, "START": "07:00", "END": "15:00"},
         "LONDON": {"ENABLED": True, "START": "15:00", "END": "23:00"},
@@ -182,26 +188,26 @@ DEFAULT_CONFIG = {
     },
 
     # ----- MISC -----
-    "MAGIC": 777777,
-    "USE_AUTO_TRADE": True,
-    "STATS_LOOKBACK_DAYS": 30,
-    "STATS_INCLUDE_MANUAL": True,
+    "MAGIC": 777777,                      # [DIPAKAI] Magic number
+    "USE_AUTO_TRADE": True,               # [DIPAKAI] Autotrade
+    "STATS_LOOKBACK_DAYS": 30,            # [DIPAKAI] Lookback stats
+    "STATS_INCLUDE_MANUAL": True,         # [DIPAKAI] Include manual di stats
 
-    # ----- MANUAL RECOVERY -----
-    "USE_MANUAL_RECOVERY": True,
-    "MANUAL_PROFILE": {
-        "SL_TP_MODE": "ATR",
-        "RR": 1.5,
-        "FIB_TP_EXT": 1.618,
-        "MIN_SL_PRICE": 3.0,
-        "MAX_SL_PRICE": 20.0,
-        "CHECK_INTERVAL": 5,
-        "OVERRIDE_EXISTING": False,
+    # ----- MANUAL RECOVERY (SEIMBANG DENGAN MODEL) -----
+    "USE_MANUAL_RECOVERY": True,          # [DIPAKAI] Aktifkan manual recovery
+    "MANUAL_PROFILE": {                   # [DIPAKAI] Config manual recovery
+        # SL_TP                             sekarang pakai broker SL/TP → fallback ATR
+        # RR                                sekarang pakai TP_RR_TP1/2/3
+        # TP_MODE                           sekarang pakai TP_RR_TP3
+        "MIN_SL_PRICE": 4.0,              # [DIPAKAI] Batas bawah SL fallback ATR
+        "MAX_SL_PRICE": 15.0,             # [DIPAKAI] Batas atas SL fallback ATR
+        "CHECK_INTERVAL": 5,              # [DIPAKAI] Interval cek manual recovery
+        "OVERRIDE_EXISTING": False,       # [DIPAKAI] Override SL/TP existing
     },
 
-    # ----- FIB SL -----
-    "USE_FIB_SL": False,
-    "SL_BUFFER": 1.0,
+    # ----- FIB SL (UNTUK MODEL LAMA) -----
+    "USE_FIB_SL": False,                  # [DIPAKAI] Pakai FIB SL atau ATR SL
+    "SL_BUFFER": 1.0,                     # [DIPAKAI] Buffer FIB SL
 }
 
 
@@ -279,7 +285,7 @@ def log_error(exc_text):
 # SECTION: BOOTSTRAP
 # ============================================================
 print("=" * 60)
-print("WEENfx PRO - v6.3.4")
+print("WEENfx PRO - v6.3.4.3")
 print("=" * 60)
 
 CONFIG = load_or_create_config()
@@ -338,7 +344,7 @@ def connect_mt5():
     retries = int(CONFIG.get("RECONNECT_RETRIES", 5))
     delay = float(CONFIG.get("RECONNECT_DELAY", 5))
     for attempt in range(1, retries + 1):
-        if mt5.initialize():
+        if mt5.initialize(path=r"C:\Program Files\MetaTrader 5\terminal64.exe"):
             print("[OK] MT5 Connected")
             return True
         print(f"[WARN] MT5 init failed ({attempt}/{retries})")
@@ -660,21 +666,62 @@ def get_active_fvg(direction=None):
     return result
 
 
-def fake_breakout_filter(df):
-    if len(df) < 2:
+def fake_breakout_filter(df, direction=None, lookback=None):
+    """
+    Deteksi fake breakout yang benar.
+    - Cek level tembus + close balik + wick dominan
+    """
+    if not CONFIG.get("USE_FAKE_BREAKOUT_FILTER", True):
         return False
-    last = df.iloc[-1]
-    prev = df.iloc[-2]
-    body = abs(last['close'] - last['open'])
-    range_candle = last['high'] - last['low']
-    if range_candle == 0:
+
+    if df is None or len(df) < 5:
         return False
-    body_ratio = body / range_candle
-    if body_ratio < float(CONFIG.get("ZONE_BODY_RATIO_MIN", 0.25)):
-        return True
-    if prev['close'] == last['close']:
-        return True
-    return False
+
+    if lookback is None:
+        lookback = int(CONFIG.get("FAKE_BREAKOUT_LOOKBACK", 10))
+
+    wick_min = float(CONFIG.get("FAKE_BREAKOUT_WICK_RATIO", 0.50))
+    body_max = float(CONFIG.get("FAKE_BREAKOUT_BODY_RATIO", 0.20))
+
+    try:
+        last = df.iloc[-1]
+        reference = df.iloc[-lookback - 1:-1]
+        recent_high = float(reference['high'].max())
+        recent_low = float(reference['low'].min())
+
+        range_candle = float(last['high'] - last['low'])
+        if range_candle <= 0:
+            return False
+
+        body = abs(float(last['close'] - last['open']))
+        body_ratio = body / range_candle
+
+        upper_wick = float(last['high'] - max(last['open'], last['close']))
+        lower_wick = float(min(last['open'], last['close']) - last['low'])
+        upper_wick_ratio = upper_wick / range_candle
+        lower_wick_ratio = lower_wick / range_candle
+
+        if direction in (None, "BUY"):
+            broke_high = last['high'] > recent_high
+            closed_back = last['close'] < recent_high
+            if broke_high and closed_back and upper_wick_ratio >= wick_min:
+                return True
+            if broke_high and closed_back and body_ratio < body_max:
+                return True
+
+        if direction in (None, "SELL"):
+            broke_low = last['low'] < recent_low
+            closed_back = last['close'] > recent_low
+            if broke_low and closed_back and lower_wick_ratio >= wick_min:
+                return True
+            if broke_low and closed_back and body_ratio < body_max:
+                return True
+
+        return False
+
+    except Exception:
+        log_error(f"fake_breakout_filter: {traceback.format_exc()}")
+        return False
 
 
 # ============================================================
@@ -857,7 +904,7 @@ def in_fib_zone(price, swing_low, swing_high, zone_low, zone_high):
 
 
 def resolve_fib_sl(swing_low, swing_high, direction, entry):
-    if not USE_FIB_SL:
+    if not CONFIG.get("USE_FIB_SL", False):
         return None
     if None in (swing_low, swing_high):
         return None
@@ -924,7 +971,7 @@ def detect_sessions():
 
 def in_session():
     active = detect_sessions()
-    if not USE_SESSION_FILTER or not SESSION_CONFIG.get("ENABLED", True):
+    if not CONFIG.get("USE_SESSION_FILTER", True) or not SESSION_CONFIG.get("ENABLED", True):
         return True
     for name in active:
         if SESSION_CONFIG.get(name, {}).get("ENABLED", False):
@@ -937,7 +984,7 @@ def get_session_status_text():
     enabled = [n for n in active if SESSION_CONFIG.get(n, {}).get("ENABLED", False)]
     if not active:
         return SESSION_STATUS, "NO ACTIVE SESSION", False
-    if not USE_SESSION_FILTER or not SESSION_CONFIG.get("ENABLED", True):
+    if not CONFIG.get("USE_SESSION_FILTER", True) or not SESSION_CONFIG.get("ENABLED", True):
         return SESSION_STATUS, ", ".join(active), True
     return SESSION_STATUS, ", ".join(active), bool(enabled)
 
@@ -976,6 +1023,7 @@ class BaseModel:
     FIB_ZONE = [0.382, 0.786]
     ZONE_TOLERANCE_ATR = 1.0
     HTF_REQUIRED = True
+    GATE_LIST = ("htf", "zone", "confirm", "swing", "fib")
 
     def __init__(self, ctx):
         self.ctx = ctx
@@ -991,12 +1039,13 @@ class BaseModel:
             "choch": None,
             "wick": None,
             "sweep": False,
-            "gate_progress": {
-                "htf": False, "zone": False, "confirm": False,
-                "swing": False, "fib": False,
-            },
+            "gate_progress": {k: False for k in self.GATE_LIST},
             "gate_score": 0,
-            "gate_total": 5,
+            "gate_total": len(self.GATE_LIST),
+            "choch_htf": None,
+            "wick_htf": None,
+            "bonus_pts": 0,
+            "bonus_met": [],
         }
 
     def _diag(self, reason):
@@ -1005,9 +1054,11 @@ class BaseModel:
     def _finalize_gate_score(self):
         gp = self.result.get("gate_progress", {})
         self.result["gate_score"] = sum(1 for v in gp.values() if v)
-        self.result["gate_total"] = len(gp)
+        self.result["gate_total"] = len(gp) if gp else 5
 
     def gate_htf(self):
+        if "htf" not in self.GATE_LIST:
+            return True
         if not self.HTF_REQUIRED:
             self.result["gate_progress"]["htf"] = True
             return True
@@ -1019,6 +1070,8 @@ class BaseModel:
         return True
 
     def gate_zone(self, direction):
+        if "zone" not in self.GATE_LIST:
+            return True
         df_ltf = self.ctx["df_ltf"]
         atr_now = self.ctx.get("atr_now", 3.0)
         tolerance = atr_now * self.ZONE_TOLERANCE_ATR
@@ -1034,33 +1087,9 @@ class BaseModel:
         self.result["gate_progress"]["zone"] = True
         return True
 
-    def gate_confirmation(self, direction, has_sweep):
-        choch_ok = (
-            (direction == "BUY" and self.ctx.get("choch_ltf") == "BULL_CHoCH") or
-            (direction == "SELL" and self.ctx.get("choch_ltf") == "BEAR_CHoCH")
-        )
-        wick_ok = (
-            (direction == "BUY" and self.ctx.get("wick_ltf") == "BULL") or
-            (direction == "SELL" and self.ctx.get("wick_ltf") == "BEAR")
-        )
-        self.result["confirm_detail"] = {
-            "sweep": has_sweep, "choch": choch_ok, "wick": wick_ok,
-            "count": sum([has_sweep, choch_ok, wick_ok]),
-        }
-        if self.NAME == "SWEEP":
-            if has_sweep and (wick_ok or choch_ok):
-                self.result["gate_progress"]["confirm"] = True
-                return True
-            self._diag(f"no-confirm(sweep={has_sweep},wick={wick_ok},choch={choch_ok})")
-            return False
-        confirmations = sum([has_sweep, choch_ok, wick_ok])
-        if confirmations >= 2:
-            self.result["gate_progress"]["confirm"] = True
-            return True
-        self._diag(f"confirm={confirmations}/3 (need 2)")
-        return False
-
     def gate_swing(self, direction):
+        if "swing" not in self.GATE_LIST:
+            return True
         df_ltf = self.ctx["df_ltf"]
         swing_low, swing_high = find_last_swing_for_fib(df_ltf, direction)
         if swing_low is None:
@@ -1076,17 +1105,19 @@ class BaseModel:
         return True
 
     def gate_fib(self, direction):
+        if "fib" not in self.GATE_LIST:
+            return True
         df_ltf = self.ctx["df_ltf"]
         entry_price = df_ltf['close'].iloc[-1]
         zone_lo, zone_hi = self.FIB_ZONE
         fib_ok = in_fib_zone(entry_price, self.result["swing_low"], self.result["swing_high"], zone_lo, zone_hi)
-        if USE_FIB_GATE and not fib_ok:
+        if CONFIG.get("USE_FIB_GATE", False) and not fib_ok:
             self._diag(f"no-FibZone({zone_lo}-{zone_hi})")
             return False
-        if not USE_FIB_GATE and not fib_ok:
+        if not CONFIG.get("USE_FIB_GATE", False) and not fib_ok:
             self._diag(f"flag-fib-out({zone_lo}-{zone_hi})")
         self.result["fib_ok"] = fib_ok
-        if not USE_FIB_GATE or fib_ok:
+        if not CONFIG.get("USE_FIB_GATE", False) or fib_ok:
             self.result["gate_progress"]["fib"] = True
         return True
 
@@ -1096,12 +1127,55 @@ class BaseModel:
 
 # ============================================================
 # SECTION: CONTINUATION MODEL
+# Syarat: HTF + POI + konfirmasi (1 dari 4) + swing + fib
 # ============================================================
 class ContinuationModel(BaseModel):
     NAME = "CONTINUATION"
     FIB_ZONE = CONFIG.get("FIB_ZONE_CONTINUATION", [0.382, 0.786])
     ZONE_TOLERANCE_ATR = float(CONFIG.get("ZONE_TOLERANCE_ATR", 1.0))
     HTF_REQUIRED = True
+    GATE_LIST = ("htf", "zone", "confirm", "swing", "fib")
+
+    def gate_confirmation(self, direction):
+        choch_m5 = self.ctx.get("choch_ltf")
+        wick_m5 = self.ctx.get("wick_ltf")
+        choch_h1 = self.ctx.get("choch_htf")
+        wick_h1 = self.ctx.get("wick_htf")
+
+        confirmations = []
+        if direction == "BUY":
+            if choch_m5 == "BULL_CHoCH":
+                confirmations.append("CHoCH_M5")
+            if wick_m5 == "BULL":
+                confirmations.append("WICK_M5")
+            if choch_h1 == "BULL_CHoCH":
+                confirmations.append("CHoCH_H1")
+            if wick_h1 == "BULL":
+                confirmations.append("WICK_H1")
+        else:
+            if choch_m5 == "BEAR_CHoCH":
+                confirmations.append("CHoCH_M5")
+            if wick_m5 == "BEAR":
+                confirmations.append("WICK_M5")
+            if choch_h1 == "BEAR_CHoCH":
+                confirmations.append("CHoCH_H1")
+            if wick_h1 == "BEAR":
+                confirmations.append("WICK_H1")
+
+        self.result["confirm_detail"] = {
+            "list": confirmations,
+            "count": len(confirmations),
+        }
+
+        if len(confirmations) >= 2:
+            self.result["gate_progress"]["confirm"] = True
+            self.result["choch"] = choch_m5
+            self.result["wick"] = wick_m5
+            self.result["choch_htf"] = choch_h1
+            self.result["wick_htf"] = wick_h1
+            return True
+        self._diag(f"no-Confirm(M5={choch_m5}/{wick_m5},H1={choch_h1}/{wick_h1})")
+        return False
 
     def evaluate(self):
         if not self.gate_htf():
@@ -1110,22 +1184,23 @@ class ContinuationModel(BaseModel):
         htf = self.ctx.get("htf_trend", "SIDEWAYS")
         direction = "BUY" if htf == "BULLISH" else "SELL"
         self.result["direction"] = direction
+
         if not self.gate_zone(direction):
             self._finalize_gate_score()
             return self.result
-        has_sweep = self.ctx.get("sweep_buy", False) if direction == "BUY" else self.ctx.get("sweep_sell", False)
-        if not self.gate_confirmation(direction, has_sweep):
+
+        if not self.gate_confirmation(direction):
             self._finalize_gate_score()
             return self.result
-        self.result["choch"] = self.ctx.get("choch_ltf")
-        self.result["wick"] = self.ctx.get("wick_ltf")
-        self.result["sweep"] = has_sweep
+
         if not self.gate_swing(direction):
             self._finalize_gate_score()
             return self.result
+
         if not self.gate_fib(direction):
             self._finalize_gate_score()
             return self.result
+
         self.result["passed"] = True
         self._finalize_gate_score()
         return self.result
@@ -1133,164 +1208,190 @@ class ContinuationModel(BaseModel):
 
 # ============================================================
 # SECTION: REVERSAL MODEL
+# Syarat: 4 jalur + POI + swing + fib
 # ============================================================
 class ReversalModel(BaseModel):
     NAME = "REVERSAL"
     FIB_ZONE = CONFIG.get("FIB_ZONE_REVERSAL", [0.5, 0.886])
     ZONE_TOLERANCE_ATR = float(CONFIG.get("ZONE_TOLERANCE_ATR", 1.0))
     HTF_REQUIRED = False
+    GATE_LIST = ("zone", "confirm", "swing", "fib")
 
-    def evaluate(self):
-        mss = self.ctx.get("choch_ltf")
-        rej = self.ctx.get("wick_ltf")
+    def gate_confirmation_4jalur(self, direction):
+        choch_m5 = self.ctx.get("choch_ltf")
+        wick_m5 = self.ctx.get("wick_ltf")
         sweep_buy = self.ctx.get("sweep_buy", False)
         sweep_sell = self.ctx.get("sweep_sell", False)
+
+        choch_ok = (
+            (direction == "BUY" and choch_m5 == "BULL_CHoCH") or
+            (direction == "SELL" and choch_m5 == "BEAR_CHoCH")
+        )
+        wick_ok = (
+            (direction == "BUY" and wick_m5 == "BULL") or
+            (direction == "SELL" and wick_m5 == "BEAR")
+        )
+        sweep_ok = (
+            (direction == "BUY" and sweep_buy) or
+            (direction == "SELL" and sweep_sell)
+        )
+
+        jalur = None
+        if sweep_ok and (choch_ok or wick_ok):
+            jalur = "A"
+        elif choch_ok and wick_ok:
+            jalur = "B"
+
+        self.result["confirm_detail"] = {
+            "jalur": jalur,
+            "sweep": sweep_ok,
+            "choch": choch_ok,
+            "wick": wick_ok,
+        }
+
+        if jalur is not None:
+            self.result["gate_progress"]["confirm"] = True
+            self.result["choch"] = choch_m5
+            self.result["wick"] = wick_m5
+            self.result["sweep"] = sweep_ok
+            return True
+
+        self._diag(f"no-Jalur(sweep={sweep_ok},choch={choch_ok},wick={wick_ok})")
+        return False
+
+    def evaluate(self):
+        choch_m5 = self.ctx.get("choch_ltf")
+        wick_m5 = self.ctx.get("wick_ltf")
+        sweep_buy = self.ctx.get("sweep_buy", False)
+        sweep_sell = self.ctx.get("sweep_sell", False)
+
         direction = None
-        if mss == "BULL_CHoCH":
+        if choch_m5 == "BULL_CHoCH":
             direction = "BUY"
-        elif mss == "BEAR_CHoCH":
+        elif choch_m5 == "BEAR_CHoCH":
             direction = "SELL"
-        elif rej == "BULL":
+        elif wick_m5 == "BULL":
             direction = "BUY"
-        elif rej == "BEAR":
+        elif wick_m5 == "BEAR":
             direction = "SELL"
         elif sweep_buy:
             direction = "BUY"
         elif sweep_sell:
             direction = "SELL"
+
         if direction is None:
-            self._diag("no-Sweep/CHoCH/wick")
+            self._diag("no-direction")
             self._finalize_gate_score()
             return self.result
+
         self.result["direction"] = direction
-        has_sweep = (direction == "BUY" and sweep_buy) or (direction == "SELL" and sweep_sell)
+        self.result["gate_progress"]["htf"] = True
+
         if not self.gate_zone(direction):
             self._finalize_gate_score()
             return self.result
-        if not self.gate_confirmation(direction, has_sweep):
+
+        if not self.gate_confirmation_4jalur(direction):
             self._finalize_gate_score()
             return self.result
-        self.result["choch"] = mss
-        self.result["wick"] = rej
-        self.result["sweep"] = has_sweep
+
         if not self.gate_swing(direction):
             self._finalize_gate_score()
             return self.result
+
         if not self.gate_fib(direction):
             self._finalize_gate_score()
             return self.result
+
         self.result["passed"] = True
         self._finalize_gate_score()
         return self.result
 
 
 # ============================================================
-# SECTION: SWEEP MODEL
+# SECTION: BONUS POINT
 # ============================================================
-class SweepModel(BaseModel):
-    NAME = "SWEEP"
-    FIB_ZONE = CONFIG.get("FIB_ZONE_SWEEP", [0.382, 0.786])
-    ZONE_TOLERANCE_ATR = float(CONFIG.get("ZONE_TOLERANCE_ATR", 1.0))
-    HTF_REQUIRED = False
-
-    def evaluate(self):
-        sweep_buy = self.ctx.get("sweep_buy", False)
-        sweep_sell = self.ctx.get("sweep_sell", False)
-        direction = None
-        if sweep_buy:
-            direction = "BUY"
-        elif sweep_sell:
-            direction = "SELL"
-        if direction is None:
-            self._diag("no-Sweep")
-            self._finalize_gate_score()
-            return self.result
-        self.result["direction"] = direction
-        if not self.gate_confirmation(direction, has_sweep=True):
-            self._finalize_gate_score()
-            return self.result
-        if not self.gate_zone(direction):
-            self._finalize_gate_score()
-            return self.result
-        self.result["choch"] = self.ctx.get("choch_ltf")
-        self.result["wick"] = self.ctx.get("wick_ltf")
-        self.result["sweep"] = True
-        if not self.gate_swing(direction):
-            self._finalize_gate_score()
-            return self.result
-        if not self.gate_fib(direction):
-            self._finalize_gate_score()
-            return self.result
-        self.result["passed"] = True
-        self._finalize_gate_score()
-        return self.result
-
-
-# ============================================================
-# SECTION: CONFLUENCE SCORE
-# ============================================================
-def calculate_confluence(model_result, ctx, session_ok):
+def calculate_bonus_points(model_result, ctx, session_ok):
     if not model_result or not model_result.get("passed"):
         return 0, []
-    score = 0
+
+    pts = 0
     met = []
+    model_name = model_result.get("model", "")
     direction = model_result["direction"]
-    htf = ctx.get("htf_trend", "SIDEWAYS")
-    want_htf = "BULLISH" if direction == "BUY" else "BEARISH"
-    if htf == want_htf:
-        score += int(CONFIG.get("CONFLUENCE_HTF_SCORE", 20))
-        met.append("HTF")
-    if model_result.get("poi_zone"):
-        score += int(CONFIG.get("CONFLUENCE_POI_SCORE", 20))
-        met.append("POI")
-    if model_result.get("choch"):
-        score += int(CONFIG.get("CONFLUENCE_CHOCH_SCORE", 15))
-        met.append("CHoCH")
-    if model_result.get("wick"):
-        score += int(CONFIG.get("CONFLUENCE_WICK_SCORE", 10))
-        met.append("WICK")
+    model_dir = "BULL" if direction == "BUY" else "BEAR"
+
     if model_result.get("fib_ok"):
-        score += int(CONFIG.get("CONFLUENCE_FIB_SCORE", 15))
-        met.append("FIB")
-    if session_ok:
-        score += int(CONFIG.get("CONFLUENCE_SESSION_SCORE", 10))
-        met.append("SESSION")
-    if CONFIG.get("USE_FVG", True):
+        if model_name == "REVERSAL":
+            w = int(CONFIG.get("BONUS_FIB_REVERSAL", 3))
+        else:
+            w = int(CONFIG.get("BONUS_FIB_OTHER", 2))
+        if w > 0:
+            pts += w
+            met.append(f"FIB+{w}")
+
+    df_ltf = ctx.get("df_ltf")
+    if df_ltf is not None and CONFIG.get("USE_FVG", True):
         fvg_dir = "BULL" if direction == "BUY" else "BEAR"
         active_fvgs = get_active_fvg(fvg_dir)
         if active_fvgs:
-            score += int(CONFIG.get("CONFLUENCE_FVG_SCORE", 5))
-            met.append(f"FVG({len(active_fvgs)})")
-    met.append("RR_PENDING")
-    return score, met
+            w = int(CONFIG.get("BONUS_OB_FVG", 2))
+            if w > 0:
+                pts += w
+                met.append(f"FVG+{w}")
+
+    if model_result.get("sweep"):
+        candle = df_ltf.iloc[-1] if df_ltf is not None else None
+        if candle is not None:
+            rng = candle['high'] - candle['low']
+            if rng > 0:
+                if direction == "BUY":
+                    wick_ratio = (min(candle['open'], candle['close']) - candle['low']) / rng
+                else:
+                    wick_ratio = (candle['high'] - max(candle['open'], candle['close'])) / rng
+                threshold = float(CONFIG.get("BONUS_SWEEP_WICK_RATIO", 0.70))
+                if wick_ratio >= threshold:
+                    w = int(CONFIG.get("BONUS_SWEEP_WICK", 2))
+                    if w > 0:
+                        pts += w
+                        met.append(f"SWEEP+{w}")
+
+    htf = ctx.get("htf_trend", "SIDEWAYS")
+    want_htf = "BULLISH" if direction == "BUY" else "BEARISH"
+    if htf == want_htf:
+        w = int(CONFIG.get("BONUS_HTF", 3))
+        if w > 0:
+            pts += w
+            met.append(f"HTF+{w}")
+
+    return pts, met
 
 
-def add_rr_score(score, met, rr):
-    if "RR_PENDING" in met:
-        met.remove("RR_PENDING")
-    if rr >= float(CONFIG.get("CONFLUENCE_RR_THRESHOLD", 2.0)):
-        score += int(CONFIG.get("CONFLUENCE_RR_SCORE", 10))
-        met.append("RR")
-    return score, met
+def add_rr_bonus(bonus_pts, met, rr):
+    threshold = float(CONFIG.get("BONUS_RR_THRESHOLD", 3.0))
+    w = int(CONFIG.get("BONUS_RR", 2))
+    if w > 0 and rr >= threshold:
+        bonus_pts += w
+        met.append(f"RR+{w}")
+    return bonus_pts, met
 
 
 def evaluate_all_models(ctx, session_ok):
     models = []
     if CONFIG.get("USE_MODEL_CONTINUATION", True):
         models.append(ContinuationModel(ctx))
-    if CONFIG.get("USE_MODEL_REVERSAL", False):
+    if CONFIG.get("USE_MODEL_REVERSAL", True):
         models.append(ReversalModel(ctx))
-    if CONFIG.get("USE_MODEL_SWEEP", False):
-        models.append(SweepModel(ctx))
+
     results = []
     for model in models:
         r = model.evaluate()
-        r.setdefault("confluence", 0)
-        r.setdefault("confluence_met", [])
+        r.setdefault("bonus_pts", 0)
+        r.setdefault("bonus_met", [])
         if r.get("passed"):
-            score, met = calculate_confluence(r, ctx, session_ok)
-            r["confluence"] = score
-            r["confluence_met"] = met
+            pts, met = calculate_bonus_points(r, ctx, session_ok)
+            r["bonus_pts"] = pts
+            r["bonus_met"] = met
         results.append(r)
     return results
 
@@ -1390,7 +1491,7 @@ def validate_tp(tp_plan, entry, sl, direction):
 
 
 # ============================================================
-# SECTION: LOT CALCULATOR
+# SECTION: LOT SIZING
 # ============================================================
 def _clamp_lot(raw_lot, symbol_info=None):
     if symbol_info is None:
@@ -1409,15 +1510,20 @@ def _clamp_lot(raw_lot, symbol_info=None):
     return round(lot, 8)
 
 
-def calculate_lot_by_confluence(confluence_score, symbol_info=None):
-    if confluence_score >= float(CONFIG.get("CONFLUENCE_TIER_3", 90)):
-        lot = float(CONFIG.get("LOT_TIER_3", 0.06))
-    elif confluence_score >= float(CONFIG.get("CONFLUENCE_TIER_2", 80)):
-        lot = float(CONFIG.get("LOT_TIER_2", 0.03))
-    elif confluence_score >= float(CONFIG.get("CONFLUENCE_TIER_1", 75)):
-        lot = float(CONFIG.get("LOT_TIER_1", 0.01))
+def calculate_lot_by_bonus(bonus_pts, symbol_info=None):
+    if not CONFIG.get("BONUS_SIZING_ENABLED", True):
+        return _clamp_lot(float(CONFIG.get("LOT_SIZE", 0.01)), symbol_info)
+
+    t1 = int(CONFIG.get("BONUS_TIER_THRESHOLD_1", 3))
+    t2 = int(CONFIG.get("BONUS_TIER_THRESHOLD_2", 8))
+
+    if bonus_pts <= t1:
+        lot = float(CONFIG.get("BONUS_LOT_TIER_1", 0.01))
+    elif bonus_pts <= t2:
+        lot = float(CONFIG.get("BONUS_LOT_TIER_2", 0.02))
     else:
-        lot = float(CONFIG.get("LOT_SIZE", 0.01))
+        lot = float(CONFIG.get("BONUS_LOT_TIER_3", 0.03))
+
     return _clamp_lot(lot, symbol_info)
 
 
@@ -1455,14 +1561,14 @@ def check_margin_guard(lot, symbol_info=None):
 
 
 # ============================================================
-# SECTION: RISK CALCULATOR
+# SECTION: RISK CALCULATOR (MODEL ENTRY)
 # ============================================================
 def calculate_risk(model_result, entry, atr_raw, symbol_info, session_ok):
     result = {
         "ok": False, "reason": "", "sl": None, "sl_source": "",
         "tp_plan": None, "rr": 0.0, "lot": 0.0,
-        "confluence": model_result.get("confluence", 0),
-        "confluence_met": model_result.get("confluence_met", []),
+        "bonus_pts": model_result.get("bonus_pts", 0),
+        "bonus_met": model_result.get("bonus_met", []),
     }
     direction = model_result["direction"]
 
@@ -1499,18 +1605,13 @@ def calculate_risk(model_result, entry, atr_raw, symbol_info, session_ok):
     result["tp_plan"] = tp_plan
     result["rr"] = rr
 
-    conf_score = result["confluence"]
-    conf_met = result["confluence_met"]
-    conf_score, conf_met = add_rr_score(conf_score, conf_met, rr)
-    result["confluence"] = conf_score
-    result["confluence_met"] = conf_met
+    bonus_pts = result["bonus_pts"]
+    bonus_met = result["bonus_met"]
+    bonus_pts, bonus_met = add_rr_bonus(bonus_pts, bonus_met, rr)
+    result["bonus_pts"] = bonus_pts
+    result["bonus_met"] = bonus_met
 
-    min_conf = float(CONFIG.get("MIN_CONFLUENCE", 75))
-    if conf_score < min_conf:
-        result["reason"] = f"conf {conf_score}% < {int(min_conf)}%"
-        return result
-
-    lot = calculate_lot_by_confluence(conf_score, symbol_info)
+    lot = calculate_lot_by_bonus(bonus_pts, symbol_info)
     result["lot"] = lot
 
     margin_ok, margin_reason = check_margin_guard(lot, symbol_info)
@@ -1582,7 +1683,7 @@ def register_partial_plan(ticket, tp_plan, orig_volume, model_name, entry_price,
 
 
 # ============================================================
-# SECTION: REBUILD
+# SECTION: REBUILD META
 # ============================================================
 def rebuild_position_meta():
     try:
@@ -1612,11 +1713,9 @@ def rebuild_position_meta():
                 model_name = "CONTINUATION"
             elif "REVERSAL" in comment_upper:
                 model_name = "REVERSAL"
-            elif "SWEEP" in comment_upper:
-                model_name = "SWEEP"
             else:
                 old_model = str(old.get("model", "")).upper()
-                if old_model in ("CONTINUATION", "REVERSAL", "SWEEP", "MANUAL", "RECOVERED"):
+                if old_model in ("CONTINUATION", "REVERSAL", "MANUAL", "RECOVERED"):
                     model_name = old_model
                 elif int(getattr(pos, "magic", 0) or 0) != magic:
                     model_name = "MANUAL"
@@ -1639,7 +1738,7 @@ def rebuild_position_meta():
             except Exception:
                 pass
 
-            if model_name in ("CONTINUATION", "REVERSAL", "SWEEP"):
+            if model_name in ("CONTINUATION", "REVERSAL"):
                 source = "position_comment_rebuild"
             elif old.get("source"):
                 source = old.get("source")
@@ -1666,6 +1765,9 @@ def rebuild_position_meta():
         log_error(f"rebuild_position_meta: {traceback.format_exc()}")
 
 
+# ============================================================
+# SECTION: REBUILD PARTIAL
+# ============================================================
 def rebuild_partial_plans():
     try:
         positions = mt5.positions_get(symbol=SYMBOL)
@@ -1700,7 +1802,7 @@ def rebuild_partial_plans():
             ticket = int(pos.ticket)
             meta = POSITION_META.get(ticket, {})
             model_name = str(meta.get("model", "")).upper()
-            if model_name not in ("CONTINUATION", "REVERSAL", "SWEEP", "MANUAL", "RECOVERED"):
+            if model_name not in ("CONTINUATION", "REVERSAL", "MANUAL", "RECOVERED"):
                 model_name = "RECOVERED"
                 POSITION_META[ticket] = {
                     "model": model_name, "sl_source": "RECOVERED",
@@ -1852,16 +1954,8 @@ def rebuild_partial_plans():
 # SECTION: ORDER EXECUTION HELPERS
 # ============================================================
 def _retryable_retcode(retcode):
-    """Retcode broker yang layak di-retry (hard-code nilai MT5)."""
     retry_codes = {
-        10004,  # TRADE_RETCODE_REQUOTE
-        10020,  # TRADE_RETCODE_PRICE_CHANGED
-        10021,  # TRADE_RETCODE_PRICE_OFF
-        10012,  # TRADE_RETCODE_TIMEOUT
-        10031,  # TRADE_RETCODE_CONNECTION
-        10024,  # TRADE_RETCODE_TOO_MANY_REQUESTS
-        10026,  # TRADE_RETCODE_SERVER_BUSY
-        10018,  # TRADE_RETCODE_TRADE_CONTEXT_BUSY
+        10004, 10020, 10021, 10012, 10031, 10024, 10026, 10018,
     }
     return retcode in retry_codes
 
@@ -1911,7 +2005,6 @@ def _close_partial(position, close_volume, symbol_info):
         if close_volume < symbol_info.volume_min:
             log_error(f"_close_partial #{position.ticket}: vol {close_volume} < min {symbol_info.volume_min}")
             return False
-
         tick = mt5.symbol_info_tick(SYMBOL)
         if tick is None:
             log_error(f"_close_partial #{position.ticket}: no tick")
@@ -1919,7 +2012,6 @@ def _close_partial(position, close_volume, symbol_info):
         price = tick.bid if position.type == 0 else tick.ask
         filling_modes = _get_supported_filling(symbol_info)
         last_rc = None
-
         for filling in filling_modes:
             req = {
                 "action": mt5.TRADE_ACTION_DEAL,
@@ -1943,7 +2035,6 @@ def _close_partial(position, close_volume, symbol_info):
             last_rc = res.retcode
             if not _retryable_retcode(res.retcode) and res.retcode not in (mt5.TRADE_RETCODE_INVALID_FILL,):
                 break
-
         log_error(f"_close_partial #{position.ticket}: ALL FAIL rc={last_rc}")
         return False
     except Exception:
@@ -1965,7 +2056,6 @@ def manage_partial_close():
         symbol_info = mt5.symbol_info(SYMBOL)
         if symbol_info is None:
             return
-
         active_tickets = {int(p.ticket) for p in positions}
 
         missing_partial = False
@@ -2060,7 +2150,6 @@ def manage_break_even():
     if atr_now is None or atr_now <= 0:
         return
     be_trigger = atr_now * float(CONFIG.get("BE_TRIGGER_ATR", 1.5))
-
     for pos in positions:
         meta = POSITION_META.get(pos.ticket, {})
         model_name = meta.get("model", "")
@@ -2082,26 +2171,22 @@ def manage_break_even():
         if move < be_trigger:
             continue
         if pos.type == 0:
-            new_sl = round(pos.price_open + float(CONFIG.get("BE_OFFSET_PRICE", 0.10)), digits)
+            new_sl = round(pos.price_open + float(CONFIG.get("BE_OFFSET_PRICE", 0.30)), digits)
             old_sl = pos.sl if pos.sl and pos.sl > 0 else -1e9
             if new_sl > old_sl and new_sl < price:
                 result = _order_send_retry({
                     "action": mt5.TRADE_ACTION_SLTP,
-                    "position": pos.ticket,
-                    "sl": new_sl,
-                    "tp": pos.tp,
+                    "position": pos.ticket, "sl": new_sl, "tp": pos.tp,
                 })
                 if result and result.retcode == mt5.TRADE_RETCODE_DONE:
                     runtime_message(f"BE {model_name} BUY #{pos.ticket} SL→{new_sl}")
         else:
-            new_sl = round(pos.price_open - float(CONFIG.get("BE_OFFSET_PRICE", 0.10)), digits)
+            new_sl = round(pos.price_open - float(CONFIG.get("BE_OFFSET_PRICE", 0.30)), digits)
             old_sl = pos.sl if pos.sl and pos.sl > 0 else 1e9
             if new_sl < old_sl and new_sl > price:
                 result = _order_send_retry({
                     "action": mt5.TRADE_ACTION_SLTP,
-                    "position": pos.ticket,
-                    "sl": new_sl,
-                    "tp": pos.tp,
+                    "position": pos.ticket, "sl": new_sl, "tp": pos.tp,
                 })
                 if result and result.retcode == mt5.TRADE_RETCODE_DONE:
                     runtime_message(f"BE {model_name} SELL #{pos.ticket} SL→{new_sl}")
@@ -2123,9 +2208,8 @@ def manage_trailing_sl():
     atr_now = get_atr_current()
     if atr_now is None or atr_now <= 0:
         return
-    trail_trigger = atr_now * float(CONFIG.get("TRAIL_TRIGGER_ATR", 2.5))
+    trail_trigger = atr_now * float(CONFIG.get("TRAIL_TRIGGER_ATR", 3.0))
     secure_pct = float(CONFIG.get("TRAIL_SECURE_PCT", 50))
-
     for pos in positions:
         meta = POSITION_META.get(pos.ticket, {})
         model_name = meta.get("model", "")
@@ -2152,9 +2236,7 @@ def manage_trailing_sl():
             if new_sl > old_sl and new_sl < pos.price_current:
                 result = _order_send_retry({
                     "action": mt5.TRADE_ACTION_SLTP,
-                    "position": pos.ticket,
-                    "sl": new_sl,
-                    "tp": pos.tp,
+                    "position": pos.ticket, "sl": new_sl, "tp": pos.tp,
                 })
                 if result and result.retcode == mt5.TRADE_RETCODE_DONE:
                     runtime_message(f"TRAIL {model_name} BUY #{pos.ticket} SL→{new_sl} max={max_move:.2f}")
@@ -2164,16 +2246,14 @@ def manage_trailing_sl():
             if new_sl < old_sl and new_sl > pos.price_current:
                 result = _order_send_retry({
                     "action": mt5.TRADE_ACTION_SLTP,
-                    "position": pos.ticket,
-                    "sl": new_sl,
-                    "tp": pos.tp,
+                    "position": pos.ticket, "sl": new_sl, "tp": pos.tp,
                 })
                 if result and result.retcode == mt5.TRADE_RETCODE_DONE:
                     runtime_message(f"TRAIL {model_name} SELL #{pos.ticket} SL→{new_sl} max={max_move:.2f}")
 
 
 # ============================================================
-# SECTION: MANUAL RECOVERY
+# SECTION: MANUAL RECOVERY (SEIMBANG DENGAN MODEL)
 # ============================================================
 def calculate_dynamic_sl(atr=None):
     if atr is None:
@@ -2185,49 +2265,92 @@ def calculate_dynamic_sl(atr=None):
 
 
 def _recover_manual_position(pos, symbol_info, atr_raw, digits):
+    """
+    Hitung SL/TP untuk manual position.
+    Logika seimbang dengan model:
+    1. Risk dari SL broker (kalau ada), fallback ATR × SL_ATR_MULT
+    2. TP3 dari broker TP (kalau ada), fallback RR × 3.0
+    3. TP1/TP2 dari RR × risk
+
+    Return: (ok, method, sl, tp1, tp2, tp3)
+    """
     direction = "BUY" if pos.type == 0 else "SELL"
     entry = float(pos.price_open)
-    mode = str(MANUAL_PROFILE.get("SL_TP_MODE", "HYBRID")).upper()
-    min_sl_price = float(MANUAL_PROFILE.get("MIN_SL_PRICE", 3.0))
-    max_sl_price = float(MANUAL_PROFILE.get("MAX_SL_PRICE", 20.0))
 
-    if mode in ("FIB", "HYBRID") and USE_FIB_SL:
-        try:
-            df_entry = get_closed_data(TIMEFRAME_ENTRY, bars=100)
-            swing_low, swing_high = find_last_swing_for_fib(df_entry, direction)
-            if swing_low is not None and swing_high is not None:
-                fib_sl = resolve_fib_sl(swing_low, swing_high, direction, entry)
-                if fib_sl is not None:
-                    sl_dist = abs(entry - fib_sl)
-                    if min_sl_price <= sl_dist <= max_sl_price:
-                        ext_level = float(MANUAL_PROFILE.get("FIB_TP_EXT", 1.618))
-                        if direction == "BUY":
-                            tp_price = fib_extension(swing_low, swing_high, ext_level)
-                        else:
-                            tp_price = fib_extension_sell(swing_low, swing_high, ext_level)
-                        valid = ((direction == "BUY" and fib_sl < entry and tp_price > entry) or
-                                 (direction == "SELL" and fib_sl > entry and tp_price < entry))
-                        if valid:
-                            return True, "FIB", round(fib_sl, digits), round(tp_price, digits)
-        except Exception as e:
-            runtime_message(f"Manual FIB calc: {e}")
+    # ==========================================
+    # 1. RISK — dari SL broker, fallback ATR
+    # ==========================================
+    try:
+        broker_sl = float(pos.sl or 0.0)
+    except Exception:
+        broker_sl = 0.0
 
-    if mode in ("ATR", "HYBRID"):
+    if broker_sl > 0 and abs(entry - broker_sl) > 0:
+        sl_price = broker_sl
+        risk = abs(entry - broker_sl)
+        sl_source = "BROKER-SL"
+    else:
         sl_price_dist = calculate_dynamic_sl(atr=atr_raw)
-        sl_price_dist = max(min_sl_price, min(max_sl_price, sl_price_dist))
-        rr = float(MANUAL_PROFILE.get("RR", 1.5))
-        tp_dist = sl_price_dist * rr
+        min_sl = float(MANUAL_PROFILE.get("MIN_SL_PRICE", 3.0))
+        max_sl = float(MANUAL_PROFILE.get("MAX_SL_PRICE", 20.0))
+        sl_price_dist = max(min_sl, min(max_sl, sl_price_dist))
         if direction == "BUY":
             sl_price = entry - sl_price_dist
-            tp_price = entry + tp_dist
         else:
             sl_price = entry + sl_price_dist
-            tp_price = entry - tp_dist
-        return True, "ATR", round(sl_price, digits), round(tp_price, digits)
-    return False, "NONE", 0.0, 0.0
+        risk = sl_price_dist
+        sl_source = "ATR"
+
+    if risk <= 0:
+        return False, "NO-RISK", 0.0, 0.0, 0.0, 0.0
+
+    # ==========================================
+    # 2. TP3 — dari broker TP, fallback RR × 3.0
+    # ==========================================
+    try:
+        broker_tp = float(pos.tp or 0.0)
+    except Exception:
+        broker_tp = 0.0
+
+    if broker_tp > 0:
+        tp3 = broker_tp
+        tp3_source = "BROKER-TP"
+    else:
+        rr3 = float(CONFIG.get("TP_RR_TP3", 3.0))
+        if direction == "BUY":
+            tp3 = entry + risk * rr3
+        else:
+            tp3 = entry - risk * rr3
+        tp3_source = "RR-TP3"
+
+    # ==========================================
+    # 3. TP1 / TP2 — dari RR × risk
+    # ==========================================
+    rr1 = float(CONFIG.get("TP_RR_TP1", 1.0))
+    rr2 = float(CONFIG.get("TP_RR_TP2", 2.0))
+
+    if direction == "BUY":
+        tp1 = entry + risk * rr1
+        tp2 = entry + risk * rr2
+    else:
+        tp1 = entry - risk * rr1
+        tp2 = entry - risk * rr2
+
+    return (
+        True,
+        f"{sl_source}+{tp3_source}",
+        round(sl_price, digits),
+        round(tp1, digits),
+        round(tp2, digits),
+        round(tp3, digits),
+    )
 
 
 def recover_manual_entries():
+    """
+    Pasang SL/TP + partial plan untuk posisi manual.
+    Logika seimbang dengan model.
+    """
     if not CONFIG.get("USE_MANUAL_RECOVERY", True):
         return
     try:
@@ -2246,13 +2369,21 @@ def recover_manual_entries():
         for pos in positions:
             if int(getattr(pos, "magic", 0) or 0) == magic:
                 continue
-            if not override and (float(pos.sl or 0.0) != 0.0 or float(pos.tp or 0.0) != 0.0):
+            if not override and (float(pos.sl or 0.0) != 0.0 and float(pos.tp or 0.0) != 0.0):
+                # SL/TP sudah ada, tetap pastikan partial plan
+                if pos.ticket not in PARTIAL_STATE:
+                    rebuild_partial_plans()
                 continue
-            ok, method, sl_price, tp_price = _recover_manual_position(pos, symbol_info, atr_raw, digits)
+
+            ok, method, sl_price, tp1, tp2, tp3 = _recover_manual_position(
+                pos, symbol_info, atr_raw, digits
+            )
             if not ok:
                 continue
+
             new_sl = sl_price if (override or pos.sl == 0) else pos.sl
-            new_tp = tp_price if (override or pos.tp == 0) else pos.tp
+            new_tp = tp3 if (override or pos.tp == 0) else pos.tp
+
             result = _order_send_retry({
                 "action": mt5.TRADE_ACTION_SLTP,
                 "position": pos.ticket,
@@ -2260,13 +2391,32 @@ def recover_manual_entries():
                 "tp": new_tp,
             })
             if result and result.retcode == mt5.TRADE_RETCODE_DONE:
-                runtime_message(f"Manual #{pos.ticket} SL:{new_sl} TP:{new_tp} [{method}]")
+                runtime_message(
+                    f"Manual #{pos.ticket} SL:{new_sl} TP:{new_tp} [{method}]"
+                )
                 POSITION_META[pos.ticket] = {
-                    "model": "MANUAL", "sl_source": method,
+                    "model": "MANUAL",
+                    "sl_source": method,
                     "source": "manual_recovery",
-                    "orig_volume": float(pos.volume), "max_move": 0.0,
+                    "orig_volume": float(pos.volume),
+                    "max_move": 0.0,
                 }
+
+                # Buat partial plan (min lot 0.03)
+                try:
+                    register_partial_plan(
+                        pos.ticket,
+                        {"tp1": tp1, "tp2": tp2, "tp3": tp3},
+                        float(pos.volume),
+                        "MANUAL",
+                        entry_price=float(pos.price_open),
+                        direction=("BUY" if pos.type == 0 else "SELL"),
+                    )
+                except Exception as e:
+                    log_error(f"recover manual partial: {e}")
+
                 persist_state()
+
     except Exception:
         log_error(f"recover_manual_entries: {traceback.format_exc()}")
 
@@ -2292,7 +2442,7 @@ def check_reentry_after_tp3(direction, current_price):
     ref_tp3 = None
     for p in positions:
         meta_p = POSITION_META.get(p.ticket, {})
-        if meta_p.get("model") not in ("CONTINUATION", "REVERSAL", "SWEEP"):
+        if meta_p.get("model") not in ("CONTINUATION", "REVERSAL"):
             continue
         p_dir = "BUY" if p.type == 0 else "SELL"
         if p_dir != direction:
@@ -2360,7 +2510,6 @@ def can_reentry(model_name, direction, entry_price, atr_now):
     max_model_map = {
         "CONTINUATION": int(CONFIG.get("MAX_POSITIONS_CONTINUATION", CONFIG.get("MAX_PER_MODEL", 2))),
         "REVERSAL": int(CONFIG.get("MAX_POSITIONS_REVERSAL", CONFIG.get("MAX_PER_MODEL", 2))),
-        "SWEEP": int(CONFIG.get("MAX_POSITIONS_SWEEP", CONFIG.get("MAX_PER_MODEL", 2))),
     }
     max_model = max_model_map.get(model_name, int(CONFIG.get("MAX_PER_MODEL", 2)))
     same_model = get_positions_by_model(model_name, direction)
@@ -2423,16 +2572,19 @@ def open_trade(model_result, risk_data, symbol_info=None):
             return False
         digits = symbol_info.digits
         entry = tick.ask if direction == "BUY" else tick.bid
+
         sl, sl_source = resolve_sl(entry, direction, atr_now,
                                     swing_low=model_result.get("swing_low"),
                                     swing_high=model_result.get("swing_high"))
         if sl is None:
             runtime_message("SL=0 skip")
             return False
+
         tp_plan = resolve_tp(entry, sl, direction)
         if tp_plan is None:
             runtime_message("TP=None skip")
             return False
+
         tp_valid, rr_est, tp_plan = validate_tp(tp_plan, entry, sl, direction)
         if not tp_valid:
             runtime_message(f"Skip RR (actual {rr_est:.2f})")
@@ -2449,6 +2601,8 @@ def open_trade(model_result, risk_data, symbol_info=None):
             if sl <= entry or tp3 >= entry:
                 runtime_message(f"BAD SL/TP SELL")
                 return False
+
+        bonus_pts = risk_data.get("bonus_pts", 0)
         order_type = mt5.ORDER_TYPE_BUY if direction == "BUY" else mt5.ORDER_TYPE_SELL
         filling_modes = _get_supported_filling(symbol_info)
         last_rc = None
@@ -2467,7 +2621,7 @@ def open_trade(model_result, risk_data, symbol_info=None):
                 last_rc = "None"
                 continue
             if result.retcode == mt5.TRADE_RETCODE_DONE:
-                runtime_message(f"OK {model_name} {direction} @{entry} SL:{sl}({sl_source}) TP:{tp3} Lot:{lot}")
+                runtime_message(f"OK {model_name} {direction} @{entry} SL:{sl} TP:{tp3} Lot:{lot} Bonus:{bonus_pts}")
                 time.sleep(float(CONFIG.get("POST_ORDER_SETTLE_DELAY", 0.50)))
                 poss = mt5.positions_get(symbol=SYMBOL)
                 if poss:
@@ -2497,7 +2651,7 @@ def _parse_model_from_comment(comment):
     if not comment:
         return "UNKNOWN"
     c = comment.upper()
-    for tag in ("CONTINUATION", "REVERSAL", "SWEEP"):
+    for tag in ("CONTINUATION", "REVERSAL"):
         if tag in c:
             return tag
     if "MANUAL" in c:
@@ -2630,42 +2784,37 @@ DIAG_STATE = {
     "demand_zones": 0, "supply_zones": 0,
     "htf_trend": "SIDEWAYS", "choch": None, "rej_wick": None,
     "sweep_buy": False, "sweep_sell": False,
+    "choch_h1": None, "wick_h1": None,
 }
 
+_GATE_TOTALS = {
+    "CONTINUATION": 5,
+    "REVERSAL": 4,
+}
 
-# ============================================================
-# SECTION: MODEL SCORES
-# ============================================================
 MODEL_SCORES = {}
 for _model_name, _flag_name, _default in (
     ("CONTINUATION", "USE_MODEL_CONTINUATION", True),
-    ("REVERSAL", "USE_MODEL_REVERSAL", False),
-    ("SWEEP", "USE_MODEL_SWEEP", False),
+    ("REVERSAL", "USE_MODEL_REVERSAL", True),
 ):
     MODEL_SCORES[_model_name] = {
         "enabled": bool(CONFIG.get(_flag_name, _default)),
-        "confluence": 0, "rr": 0.0, "direction": "-",
+        "bonus_pts": 0, "rr": 0.0, "direction": "-",
         "valid": False, "status": "WAIT", "reason": "Waiting for closed candle",
-        "met": [], "gate_score": 0, "gate_total": 5, "gates": {},
+        "met": [], "gate_score": 0,
+        "gate_total": _GATE_TOTALS.get(_model_name, 5),
+        "gates": {},
     }
 
-
-# ============================================================
-# SECTION: GATE PROGRESS (GLOBAL)
-# ============================================================
 GATE_PROGRESS = {}
 
-
-# ============================================================
-# SECTION: UI STATE
-# ============================================================
 best_model_global = {}
 
 SIGNAL_STATE = {
     "status": "WAITING",
     "model": "-",
     "direction": "-",
-    "confluence": 0,
+    "bonus_pts": 0,
     "rr": 0.0,
     "entry": None,
     "sl": None,
@@ -2717,7 +2866,7 @@ def render_stats_panel():
     if g["losses"] > 0:
         tbl.add_row("Avg Loss", Text(f"${g['avg_loss']:.2f}", style="red"))
     tbl.add_row("", Text("-" * 20, style="dim"))
-    for model in ("CONTINUATION", "REVERSAL", "SWEEP", "MANUAL"):
+    for model in ("CONTINUATION", "REVERSAL", "MANUAL"):
         if model in per:
             s = per[model]
             style = "green" if s["profit_total"] >= 0 else "red"
@@ -2747,25 +2896,24 @@ def render_diagnostic_panel():
     htf = DIAG_STATE["htf_trend"]
     tbl.add_row("HTF Trend", Text(htf, style="green" if htf in ("BULLISH", "BEARISH") else "red"))
     choch = DIAG_STATE["choch"] or "-"
-    tbl.add_row("CHoCH", Text(choch, style="green" if choch != "-" else "dim"))
+    tbl.add_row("CHoCH M5", Text(choch, style="green" if choch != "-" else "dim"))
     wick = DIAG_STATE["rej_wick"] or "-"
-    tbl.add_row("RejWick", Text(wick, style="green" if wick != "-" else "dim"))
-    tbl.add_row("Sweep BUY", gate_ok(DIAG_STATE["sweep_buy"]))
-    tbl.add_row("Sweep SELL", gate_ok(DIAG_STATE["sweep_sell"]))
+    tbl.add_row("RejWick M5", Text(wick, style="green" if wick != "-" else "dim"))
+    choch_h1 = DIAG_STATE["choch_h1"] or "-"
+    tbl.add_row("CHoCH H1", Text(choch_h1, style="green" if choch_h1 != "-" else "dim"))
+    wick_h1 = DIAG_STATE["wick_h1"] or "-"
+    tbl.add_row("RejWick H1", Text(wick_h1, style="green" if wick_h1 != "-" else "dim"))
     tbl.add_row("FVG Bull", Text(f"{len(get_active_fvg('BULL'))}",
                                   style="green" if get_active_fvg('BULL') else "dim"))
     tbl.add_row("FVG Bear", Text(f"{len(get_active_fvg('BEAR'))}",
                                   style="red" if get_active_fvg('BEAR') else "dim"))
-    tbl.add_row("", Text("-" * 20, style="dim"))
-    for _ in range(2):
-        tbl.add_row("", Text(""))
     return tbl
 
 
 def render_model_scores_panel():
     tbl = Table.grid(expand=True, padding=(0, 1))
     tbl.add_column(style="cyan", no_wrap=True)
-    for _ in range(3):
+    for _ in range(2):
         tbl.add_column(ratio=1, justify="center")
 
     def _header_col(m):
@@ -2775,40 +2923,63 @@ def render_model_scores_panel():
             t.append(" <", style="bold yellow")
         return t
 
-    tbl.add_row("", _header_col("CONTINUATION"), _header_col("REVERSAL"), _header_col("SWEEP"))
-    rows = {"Gate": [], "Conf": [], "RR": [], "Dir": [], "Status": [], "Reason": []}
-    for m in ("CONTINUATION", "REVERSAL", "SWEEP"):
+    tbl.add_row("", _header_col("CONTINUATION"), _header_col("REVERSAL"))
+
+    row_gate = [Text("Gate", style="dim")]
+    row_bonus = [Text("Bonus", style="dim")]
+    row_rr = [Text("RR", style="dim")]
+    row_dir = [Text("Dir", style="dim")]
+    row_status = [Text("Status", style="dim")]
+    row_reason = [Text("Reason", style="dim")]
+
+    _flags = {
+        "CONTINUATION": "USE_MODEL_CONTINUATION",
+        "REVERSAL": "USE_MODEL_REVERSAL",
+    }
+
+    for m in ("CONTINUATION", "REVERSAL"):
         s = MODEL_SCORES.get(m, {})
-        enabled = s.get("enabled", CONFIG.get({
-            "CONTINUATION": "USE_MODEL_CONTINUATION",
-            "REVERSAL": "USE_MODEL_REVERSAL",
-            "SWEEP": "USE_MODEL_SWEEP",
-        }[m], False))
+        enabled = s.get("enabled", bool(CONFIG.get(_flags[m], True)))
         if not enabled:
-            rows["Gate"].append(Text("OFF", style="dim"))
-            rows["Conf"].append(Text("-", style="dim"))
-            rows["RR"].append(Text("-", style="dim"))
-            rows["Dir"].append(Text("-", style="dim"))
-            rows["Status"].append(Text("DISABLED", style="dim"))
-            rows["Reason"].append(Text("model off", style="dim"))
+            row_gate.append(Text("OFF", style="dim"))
+            row_bonus.append(Text("-", style="dim"))
+            row_rr.append(Text("-", style="dim"))
+            row_dir.append(Text("-", style="dim"))
+            row_status.append(Text("DISABLED", style="dim"))
+            row_reason.append(Text("model off", style="dim"))
             continue
         gs, gt = s.get("gate_score", 0), s.get("gate_total", 5)
         gate_style = "bold green" if gs >= gt else ("yellow" if gs >= gt - 1 else "dim")
-        rows["Gate"].append(Text(f"{gs}/{gt}", style=gate_style))
-        conf = float(s.get("confluence", 0) or 0)
-        conf_style = "bold green" if conf >= float(CONFIG.get("MIN_CONFLUENCE", 75)) else ("yellow" if conf > 0 else "dim")
-        rows["Conf"].append(Text(f"{conf:.0f}%", style=conf_style))
+        row_gate.append(Text(f"{gs}/{gt}", style=gate_style))
+        bonus = int(s.get("bonus_pts", 0))
+        t1 = int(CONFIG.get("BONUS_TIER_THRESHOLD_1", 3))
+        t2 = int(CONFIG.get("BONUS_TIER_THRESHOLD_2", 8))
+        if bonus >= t2 + 1:
+            b_style = "bold green"
+        elif bonus >= t1 + 1:
+            b_style = "green"
+        else:
+            b_style = "white"
+        row_bonus.append(Text(f"{bonus}", style=b_style))
         rr = float(s.get("rr", 0) or 0)
         rr_style = "green" if rr >= 2 else ("cyan" if rr >= 1.2 else "dim")
-        rows["RR"].append(Text(f"1:{rr:.1f}", style=rr_style))
+        row_rr.append(Text(f"1:{rr:.1f}", style=rr_style))
         d = s.get("direction", "-") or "-"
-        rows["Dir"].append(Text(d, style="green" if d == "BUY" else "red" if d == "SELL" else "dim"))
+        row_dir.append(Text(d, style="green" if d == "BUY" else "red" if d == "SELL" else "dim"))
         status = s.get("status", "WAIT")
-        status_style = {"READY": "bold green", "RISK_OK": "green", "GATE": "yellow", "BLOCKED": "yellow", "WAIT": "dim"}.get(status, "dim")
-        rows["Status"].append(Text(status, style=status_style))
-        rows["Reason"].append(Text(str(s.get("reason", ""))[:28], style="white", overflow="fold"))
-    for label in ("Gate", "Conf", "RR", "Dir", "Status", "Reason"):
-        tbl.add_row(Text(label, style="dim"), *rows[label])
+        status_style = {"READY": "bold green", "RISK_OK": "green",
+                        "GATE": "yellow", "BLOCKED": "yellow", "WAIT": "dim",
+                        "DISABLED": "dim"}.get(status, "dim")
+        row_status.append(Text(status, style=status_style))
+        reason_txt = str(s.get("reason", ""))[:32]
+        row_reason.append(Text(reason_txt, style="white", overflow="fold"))
+
+    tbl.add_row(*row_gate)
+    tbl.add_row(*row_bonus)
+    tbl.add_row(*row_rr)
+    tbl.add_row(*row_dir)
+    tbl.add_row(*row_status)
+    tbl.add_row(*row_reason)
     return tbl
 
 
@@ -2819,8 +2990,12 @@ def render_gate_progress_panel():
     tbl.add_column(ratio=1)
     tbl.add_column(ratio=1)
 
-    def _bar(gates):
-        order = ("htf", "zone", "confirm", "swing", "fib")
+    _GATE_LIST = {
+        "CONTINUATION": ("htf", "zone", "confirm", "swing", "fib"),
+        "REVERSAL":     ("zone", "confirm", "swing", "fib"),
+    }
+
+    def _bar(gates, order):
         return "".join("✓" if gates.get(k, False) else "✗" for k in order)
 
     def _style(score, total):
@@ -2838,19 +3013,23 @@ def render_gate_progress_panel():
         Text("SCORE", style="dim"),
         Text("MISSING", style="dim"),
     )
-    order = ("htf", "zone", "confirm", "swing", "fib")
-    for model_name in ("CONTINUATION", "REVERSAL", "SWEEP"):
+
+    for model_name in ("CONTINUATION", "REVERSAL"):
+        order = _GATE_LIST.get(model_name, ("htf", "zone", "confirm", "swing", "fib"))
         gp = GATE_PROGRESS.get(model_name, {})
         if not gp.get("enabled", True):
-            tbl.add_row(Text(f"{model_name[:4]} OFF", style="dim"),
-                        Text("[-----]", style="dim"), Text("-", style="dim"),
-                        Text("DISABLED", style="dim"))
+            tbl.add_row(
+                Text(f"{model_name[:4]} OFF", style="dim"),
+                Text("[" + "-" * len(order) + "]", style="dim"),
+                Text("-", style="dim"),
+                Text("DISABLED", style="dim"),
+            )
             continue
         score = gp.get("score", 0)
-        total = gp.get("total", 5)
+        total = gp.get("total", len(order))
         gates = gp.get("gates", {})
         direction = gp.get("direction", "-")
-        bar = _bar(gates)
+        bar = _bar(gates, order)
         style = _style(score, total)
         missing = [k for k in order if not gates.get(k, False)]
         missing_txt = ",".join(missing) if missing else "READY"
@@ -2905,7 +3084,7 @@ def render_rich_dashboard(*, account, positions, bid, ask, price_direction,
     header.add_column(ratio=1)
     header.add_column(justify="center", ratio=1)
     header.add_column(justify="right", ratio=1)
-    title = Text("WEENfx PRO - v6.3.4", style="bold cyan")
+    title = Text("WEENfx PRO - v6.3.4.3", style="bold cyan")
     symbol = Text(SYMBOL, style="bold white")
     right = Text()
     right.append(now, style="white")
@@ -2942,7 +3121,11 @@ def render_rich_dashboard(*, account, positions, bid, ask, price_direction,
     market.add_row("HTF", rich_direction(htf_trend))
     market.add_row("ATR", Text(f"{atr_val:.2f}  {'OK' if atr_ok else 'LOW'}",
                                style="green" if atr_ok else "red"))
-    market.add_row("Confluence", Text(f"Min {int(CONFIG.get('MIN_CONFLUENCE', 75))}%", style="cyan"))
+    market.add_row("Lot Tier", Text(
+        f"≤{CONFIG.get('BONUS_TIER_THRESHOLD_1',3)}:{CONFIG.get('BONUS_LOT_TIER_1',0.01)} "
+        f"≤{CONFIG.get('BONUS_TIER_THRESHOLD_2',8)}:{CONFIG.get('BONUS_LOT_TIER_2',0.02)} "
+        f">{CONFIG.get('BONUS_TIER_THRESHOLD_2',8)}:{CONFIG.get('BONUS_LOT_TIER_3',0.03)}",
+        style="cyan"))
     market.add_row("Session", session_txt)
     market.add_row("", Text(""))
 
@@ -2956,8 +3139,8 @@ def render_rich_dashboard(*, account, positions, bid, ask, price_direction,
     signal.add_row("MODEL", Text(f"{ss.get('model','-')} {ss.get('direction','-')}", style="bold cyan"))
     signal.add_row("Gate", Text(f"{ss.get('gate_score',0)}/{ss.get('gate_total',5)}",
                                 style="green" if ss.get('gate_score',0) >= ss.get('gate_total',5) else "yellow"))
-    signal.add_row("Conf", Text(f"{ss.get('confluence',0):.0f}%",
-                                style="green" if ss.get('confluence',0) >= float(CONFIG.get('MIN_CONFLUENCE',75)) else "yellow"))
+    signal.add_row("Bonus", Text(f"{ss.get('bonus_pts',0)}",
+                                 style="green" if ss.get('bonus_pts',0) > 0 else "dim"))
     signal.add_row("RR", Text(f"1:{ss.get('rr',0):.1f}", style="cyan"))
     if ss.get("entry") is not None:
         signal.add_row("Entry", Text(f"{ss['entry']:.2f}", style="white"))
@@ -2977,14 +3160,14 @@ def render_rich_dashboard(*, account, positions, bid, ask, price_direction,
 
     try:
         scores_panel = Panel(render_model_scores_panel(),
-                             title=f"MODEL SCORES  [Min Conf {int(CONFIG.get('MIN_CONFLUENCE',75))}%]",
+                             title="MODEL SCORES",
                              border_style="cyan", expand=True)
     except Exception as e:
         scores_panel = Panel(Text(f"scores err: {e}", style="red"), border_style="red")
 
     try:
         gate_panel = Panel(render_gate_progress_panel(),
-                           title="GATE PROGRESS  (early signal indicator)",
+                           title="GATE PROGRESS",
                            border_style="magenta", expand=True)
     except Exception as e:
         gate_panel = Panel(Text(f"gate err: {e}", style="red"), border_style="red")
@@ -3059,15 +3242,15 @@ def render_rich_dashboard(*, account, positions, bid, ask, price_direction,
     risk.add_column(style="cyan", no_wrap=True, width=14)
     risk.add_column(ratio=1)
     risk.add_row("AutoTrade", rich_status(CONFIG.get("USE_AUTO_TRADE", True)))
+    risk.add_row("Sizing", Text("BONUS" if CONFIG.get("BONUS_SIZING_ENABLED", True) else "FIXED",
+                                 style="magenta"))
     risk.add_row("SL", Text(f"{'FIB' if CONFIG.get('USE_FIB_SL') else 'ATR'} ×{CONFIG.get('SL_ATR_MULT', 1.5)}", style="cyan"))
     risk.add_row("TP RR", Text(f"1:{CONFIG.get('TP_RR_TP1',1.0)}/1:{CONFIG.get('TP_RR_TP2',2.0)}/1:{CONFIG.get('TP_RR_TP3',3.0)}"))
     risk.add_row("BE", Text(f"ATR×{CONFIG.get('BE_TRIGGER_ATR',1.5)}", style="cyan"))
-    risk.add_row("Trail", Text(f"ATR×{CONFIG.get('TRAIL_TRIGGER_ATR',2.5)} s{CONFIG.get('TRAIL_SECURE_PCT',50)}%"))
+    risk.add_row("Trail", Text(f"ATR×{CONFIG.get('TRAIL_TRIGGER_ATR',3.0)} s{CONFIG.get('TRAIL_SECURE_PCT',50)}%"))
     risk.add_row("Partial", Text(f"{CONFIG.get('PARTIAL_MODE', 'PERCENT')} "
                                   f"{CONFIG.get('PARTIAL_PCT_1', 33)}/{CONFIG.get('PARTIAL_PCT_2', 33)}",
                                   style="magenta"))
-    risk.add_row("FVG Mit", Text("ON" if CONFIG.get("USE_FVG_MITIGATION", True) else "OFF",
-                                  style="green" if CONFIG.get("USE_FVG_MITIGATION", True) else "dim"))
     risk.add_row("Daily", Text(f"${daily_pnl:.2f} / {daily_loss_percent:.2f}%"))
     risk.add_row("FakeBrk", Text("FAKE!" if fakeout else "clear",
                                   style="red" if fakeout else "green"))
@@ -3160,24 +3343,15 @@ def render_rich_dashboard(*, account, positions, bid, ask, price_direction,
 # SECTION: STARTUP
 # ============================================================
 print("=" * 60)
-print("Starting v6.3.4 (SMC + FVG Mitigation + Fib 5 Level)...")
+print("Starting v6.3.4.3 (2 Model | Manual/Recovery Seimbang)...")
 print(f"   Symbol: {SYMBOL}")
 print(f"   Entry TF: {TIMEFRAME_ENTRY}")
 print(f"   Auto Trade: {'ON' if CONFIG.get('USE_AUTO_TRADE', True) else 'OFF'}")
 print(f"   Model: CONT={CONFIG.get('USE_MODEL_CONTINUATION', True)} "
-      f"REV={CONFIG.get('USE_MODEL_REVERSAL', False)} "
-      f"SWP={CONFIG.get('USE_MODEL_SWEEP', False)}")
-print(f"   SL: {'FIB' if CONFIG.get('USE_FIB_SL') else 'ATR'} x {CONFIG.get('SL_ATR_MULT', 1.5)} "
-      f"(max {CONFIG.get('MAX_SL_POINTS', 15.0)} poin)")
-print(f"   TP RR: 1:{CONFIG.get('TP_RR_TP1',1.0)} / 1:{CONFIG.get('TP_RR_TP2',2.0)} / 1:{CONFIG.get('TP_RR_TP3',3.0)}")
-print(f"   BE: ATR x {CONFIG.get('BE_TRIGGER_ATR',1.5)}")
-print(f"   Trailing: ATR x {CONFIG.get('TRAIL_TRIGGER_ATR',2.5)} sec {CONFIG.get('TRAIL_SECURE_PCT',50)}%")
-print(f"   Min Confluence: {int(CONFIG.get('MIN_CONFLUENCE',75))}%")
-print(f"   Partial: {CONFIG.get('PARTIAL_MODE', 'PERCENT')} "
-      f"({CONFIG.get('PARTIAL_PCT_1', 33)}/{CONFIG.get('PARTIAL_PCT_2', 33)})")
-print(f"   SMC ATR Period: {CONFIG.get('SMC_ATR_PERIOD', 50)} (dari FluidTrades)")
-print(f"   Overlap Filter: ATR x {CONFIG.get('ZONE_OVERLAP_ATR', 1.0)} (dari FluidTrades)")
-print(f"   FVG Mitigation: {'ON' if CONFIG.get('USE_FVG_MITIGATION', True) else 'OFF'} (dari LudoGH68)")
+      f"REV={CONFIG.get('USE_MODEL_REVERSAL', True)}")
+print(f"   Sizing: BONUS (tier ≤{CONFIG.get('BONUS_TIER_THRESHOLD_1',3)}→{CONFIG.get('BONUS_LOT_TIER_1',0.01)}, "
+      f"≤{CONFIG.get('BONUS_TIER_THRESHOLD_2',8)}→{CONFIG.get('BONUS_LOT_TIER_2',0.02)}, "
+      f">{CONFIG.get('BONUS_TIER_THRESHOLD_2',8)}→{CONFIG.get('BONUS_LOT_TIER_3',0.03)})")
 print("=" * 60)
 
 time.sleep(float(CONFIG.get("STARTUP_DELAY", 2)))
@@ -3187,7 +3361,6 @@ console.clear()
 # ============================================================
 # SECTION: MAIN LOOP
 # ============================================================
-
 last_analyzed_candle_time = None
 last_smc_update = 0.0
 last_manual_recovery = 0.0
@@ -3243,7 +3416,7 @@ with Live(console=console, refresh_per_second=4, screen=True, transient=False,
                 connected = False
                 for attempt in range(int(CONFIG.get("RECONNECT_RETRIES", 5))):
                     try:
-                        if mt5.initialize():
+                        if mt5.initialize(path=r"C:\Program Files\MetaTrader 5\terminal64.exe"):
                             connected = True
                             runtime_message("MT5 reconnected")
                             break
@@ -3332,48 +3505,60 @@ with Live(console=console, refresh_per_second=4, screen=True, transient=False,
 
                 trend = trend_m5()
                 htf_trend = get_higher_timeframe_trend()
-                choch = detect_choch(df, int(CONFIG.get("SWING_STRICTNESS", 1)))
-                wick = detect_rejection_wick(df)
+                choch_m5 = detect_choch(df, int(CONFIG.get("SWING_STRICTNESS", 1)))
+                wick_m5 = detect_rejection_wick(df)
                 sweep_buy = smart_liquidity_sweep(df, "BUY", atr_raw=atr_raw)
                 sweep_sell = smart_liquidity_sweep(df, "SELL", atr_raw=atr_raw)
+
+                df_htf = get_closed_data(TIMEFRAME_HTF, bars=100)
+                choch_h1 = None
+                wick_h1 = None
+                if df_htf is not None and not df_htf.empty:
+                    choch_h1 = detect_choch(df_htf, int(CONFIG.get("SWING_STRICTNESS", 1)))
+                    wick_h1 = detect_rejection_wick(df_htf)
 
                 DIAG_STATE["swing_buy"] = find_last_swing_for_fib(df, "BUY")[0] is not None
                 DIAG_STATE["swing_sell"] = find_last_swing_for_fib(df, "SELL")[0] is not None
                 DIAG_STATE["demand_zones"] = len(demand_zones)
                 DIAG_STATE["supply_zones"] = len(supply_zones)
                 DIAG_STATE["htf_trend"] = htf_trend
-                DIAG_STATE["choch"] = choch
-                DIAG_STATE["rej_wick"] = wick
+                DIAG_STATE["choch"] = choch_m5
+                DIAG_STATE["rej_wick"] = wick_m5
                 DIAG_STATE["sweep_buy"] = sweep_buy
                 DIAG_STATE["sweep_sell"] = sweep_sell
+                DIAG_STATE["choch_h1"] = choch_h1
+                DIAG_STATE["wick_h1"] = wick_h1
 
                 ctx = {
                     "df_ltf": df,
-                    "df_htf": get_closed_data(TIMEFRAME_HTF, bars=100),
+                    "df_htf": df_htf,
                     "htf_trend": htf_trend,
                     "trend_ltf": trend,
                     "demand_zones": demand_zones,
                     "supply_zones": supply_zones,
                     "atr_raw": atr_raw,
                     "atr_now": atr_raw or 3.0,
-                    "choch_ltf": choch,
-                    "wick_ltf": wick,
+                    "choch_ltf": choch_m5,
+                    "wick_ltf": wick_m5,
+                    "choch_htf": choch_h1,
+                    "wick_htf": wick_h1,
                     "sweep_buy": sweep_buy,
                     "sweep_sell": sweep_sell,
                 }
 
-                for model_name in ("CONTINUATION", "REVERSAL", "SWEEP"):
+                for model_name in ("CONTINUATION", "REVERSAL"):
                     flag_name = {
                         "CONTINUATION": "USE_MODEL_CONTINUATION",
                         "REVERSAL": "USE_MODEL_REVERSAL",
-                        "SWEEP": "USE_MODEL_SWEEP",
                     }[model_name]
                     enabled = bool(CONFIG.get(flag_name, False))
                     MODEL_SCORES[model_name] = {
-                        "enabled": enabled, "confluence": 0, "rr": 0.0, "direction": "-",
+                        "enabled": enabled, "bonus_pts": 0, "rr": 0.0, "direction": "-",
                         "valid": False, "status": "WAIT" if enabled else "DISABLED",
                         "reason": "Waiting for model evaluation" if enabled else "model off",
-                        "met": [], "gate_score": 0, "gate_total": 5, "gates": {},
+                        "met": [], "gate_score": 0,
+                        "gate_total": _GATE_TOTALS.get(model_name, 5),
+                        "gates": {},
                     }
 
                 model_results = evaluate_all_models(ctx, session_ok)
@@ -3397,10 +3582,11 @@ with Live(console=console, refresh_per_second=4, screen=True, transient=False,
                         "reason": mr.get("reason", "Gate incomplete") if not mr.get("passed") else "Gate OK",
                     })
 
-                for model_name in ("CONTINUATION", "REVERSAL", "SWEEP"):
+                for model_name in ("CONTINUATION", "REVERSAL"):
                     if model_name not in GATE_PROGRESS:
                         GATE_PROGRESS[model_name] = {
-                            "enabled": False, "score": 0, "total": 5,
+                            "enabled": False, "score": 0,
+                            "total": _GATE_TOTALS.get(model_name, 5),
                             "gates": {}, "direction": "-",
                         }
 
@@ -3415,24 +3601,24 @@ with Live(console=console, refresh_per_second=4, screen=True, transient=False,
                         entry = tick.ask if direction == "BUY" else tick.bid
                         risk_data = calculate_risk(mr, entry, atr_raw, symbol_info, session_ok)
                         MODEL_SCORES[mr["model"]].update({
-                            "confluence": risk_data["confluence"],
+                            "bonus_pts": risk_data["bonus_pts"],
                             "rr": risk_data["rr"],
                             "direction": direction,
                             "valid": risk_data["ok"],
                             "status": "RISK_OK" if risk_data["ok"] else "BLOCKED",
                             "reason": risk_data["reason"] if not risk_data["ok"] else "Risk OK",
-                            "met": risk_data["confluence_met"],
+                            "met": risk_data["bonus_met"],
                         })
                         if risk_data["ok"]:
                             combined = dict(mr)
                             combined.update({
                                 "entry": entry, "sl": risk_data["sl"], "lot": risk_data["lot"],
-                                "rr": risk_data["rr"], "confluence": risk_data["confluence"],
-                                "confluence_met": risk_data["confluence_met"], "risk_data": risk_data,
+                                "rr": risk_data["rr"], "bonus_pts": risk_data["bonus_pts"],
+                                "bonus_met": risk_data["bonus_met"], "risk_data": risk_data,
                             })
                             risk_candidates.append(combined)
 
-                candidate_model = max(risk_candidates, key=lambda x: x["confluence"]) if risk_candidates else None
+                candidate_model = max(risk_candidates, key=lambda x: x["bonus_pts"]) if risk_candidates else None
                 best_model = candidate_model
                 best_risk = candidate_model.get("risk_data") if candidate_model else None
                 signal_reason = "No model passed risk"
@@ -3453,7 +3639,8 @@ with Live(console=console, refresh_per_second=4, screen=True, transient=False,
                         best_model = None
                         best_risk = None
                         signal_status = "BLOCKED"
-                    elif fake_breakout_filter(df) and candidate_model["model"] == "CONTINUATION":
+                    elif (fake_breakout_filter(df, direction=candidate_model["direction"])
+                          and candidate_model["model"] == "CONTINUATION"):
                         signal_reason = "Fake breakout filter"
                         MODEL_SCORES[candidate_model["model"]]["status"] = "BLOCKED"
                         MODEL_SCORES[candidate_model["model"]]["reason"] = signal_reason
@@ -3474,7 +3661,7 @@ with Live(console=console, refresh_per_second=4, screen=True, transient=False,
                     SIGNAL_STATE.update({
                         "status": signal_status, "model": display_model["model"],
                         "direction": display_model["direction"],
-                        "confluence": float(display_model.get("confluence", 0)),
+                        "bonus_pts": float(display_model.get("bonus_pts", 0)),
                         "rr": float(display_model.get("rr", 0)),
                         "entry": float(display_model.get("entry")) if display_model.get("entry") is not None else None,
                         "sl": float(display_model.get("sl")) if display_model.get("sl") is not None else None,
@@ -3490,14 +3677,14 @@ with Live(console=console, refresh_per_second=4, screen=True, transient=False,
                         SIGNAL_STATE.update({
                             "status": "WAIT_GATE", "model": n,
                             "direction": g.get("direction", "-"),
-                            "confluence": 0, "rr": 0.0, "entry": None, "sl": None, "lot": 0,
+                            "bonus_pts": 0, "rr": 0.0, "entry": None, "sl": None, "lot": 0,
                             "reason": MODEL_SCORES.get(n, {}).get("reason", "Gate incomplete"),
                             "gate_score": g.get("score", 0), "gate_total": g.get("total", 5),
                         })
                     else:
                         SIGNAL_STATE.update({
                             "status": "WAITING", "model": "-", "direction": "-",
-                            "confluence": 0, "rr": 0.0, "entry": None, "sl": None, "lot": 0,
+                            "bonus_pts": 0, "rr": 0.0, "entry": None, "sl": None, "lot": 0,
                             "reason": "No enabled model", "gate_score": 0, "gate_total": 5,
                         })
 
@@ -3510,7 +3697,7 @@ with Live(console=console, refresh_per_second=4, screen=True, transient=False,
                                               best_model["entry"], atr_now)
                     if can:
                         SIGNAL_STATE["status"] = "READY"
-                        runtime_message(f"EXEC {best_model['model']} {best_model['direction']} conf={best_risk['confluence']}%")
+                        runtime_message(f"EXEC {best_model['model']} {best_model['direction']} bonus={best_risk['bonus_pts']}")
                         opened = open_trade(best_model, best_risk, symbol_info)
                         if opened:
                             SIGNAL_STATE["status"] = "EXECUTED"
@@ -3555,5 +3742,5 @@ with Live(console=console, refresh_per_second=4, screen=True, transient=False,
 
 
 # ============================================================
-# END OF FILE — v6.3.4
+# END OF FILE — v6.3.4.3
 # ============================================================
