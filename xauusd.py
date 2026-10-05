@@ -2022,7 +2022,7 @@ def _close_partial(position, close_volume, symbol_info):
                 "price": price,
                 "deviation": int(CONFIG.get("TRADE_DEVIATION", 20)),
                 "magic": int(CONFIG.get("MAGIC", 777777)),
-                "comment": "PARTIAL_V6",
+                "comment": "Wfx_PARTIAL",
                 "type_filling": filling,
                 "type_time": mt5.ORDER_TIME_GTC,
             }
