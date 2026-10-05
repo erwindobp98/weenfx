@@ -20,7 +20,7 @@ Expert Advisor untuk MetaTrader 5 (XAUUSD) dengan strategi **Smart Money Concept
 - ✅ Dashboard rich (live, multi-panel)
 - ✅ Stats 30 hari (winrate, PF, per model)
 
-<img width="618" height="800" alt="image" src="https://github.com/user-attachments/assets/4174804c-05ca-4a30-a5c4-15171935d8ce" />
+<img width="615" height="770" alt="image" src="https://github.com/user-attachments/assets/4d07697f-f05c-466f-95a2-a83d991e924c" />
 
 ## Requirements
 
