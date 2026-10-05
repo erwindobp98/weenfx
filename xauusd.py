@@ -344,7 +344,7 @@ def connect_mt5():
     retries = int(CONFIG.get("RECONNECT_RETRIES", 5))
     delay = float(CONFIG.get("RECONNECT_DELAY", 5))
     for attempt in range(1, retries + 1):
-        if mt5.initialize(path=r"C:\Program Files\MetaTrader 5\terminal64.exe"):
+        if mt5.initialize():
             print("[OK] MT5 Connected")
             return True
         print(f"[WARN] MT5 init failed ({attempt}/{retries})")
@@ -3416,7 +3416,7 @@ with Live(console=console, refresh_per_second=4, screen=True, transient=False,
                 connected = False
                 for attempt in range(int(CONFIG.get("RECONNECT_RETRIES", 5))):
                     try:
-                        if mt5.initialize(path=r"C:\Program Files\MetaTrader 5\terminal64.exe"):
+                        if mt5.initialize():
                             connected = True
                             runtime_message("MT5 reconnected")
                             break
