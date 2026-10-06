@@ -8,7 +8,7 @@ Expert Advisor untuk MetaTrader 5 (XAUUSD) dengan strategi **Smart Money Concept
 
 ## Fitur
 
-- ✅ 3 model entry (CONTINUATION, REVERSAL)
+- ✅ 2 model entry (CONTINUATION, REVERSAL)
 - ✅ Deteksi SMC: Demand/Supply zone, CHoCH, Order Block, FVG
 - ✅ Fibonacci entry zone (OTE) + Fib SL
 - ✅ Partial close (TP1/TP2) + broker TP3
